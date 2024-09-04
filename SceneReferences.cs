@@ -5,7 +5,7 @@ using UnityEngine;
 using VRC.SDKBase;
 using VRC.Udon;
 
-public class PlayerData : UdonSharpBehaviour
+public class SceneReferences : UdonSharpBehaviour
 {
     // fields with "total" count lifetime, for example as achievement or to unlock things
     // duplicate crop to make more different plants

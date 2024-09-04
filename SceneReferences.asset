@@ -10,18 +10,18 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c333ccfdd0cbdbc4ca30cef2dd6e6b9b, type: 3}
-  m_Name: PlayerData
+  m_Name: SceneReferences
   m_EditorClassIdentifier: 
   serializedUdonProgramAsset: {fileID: 11400000, guid: 6ca9f4001e5f6b040a9a75a54432af44,
     type: 2}
   udonAssembly: 
   assemblyError: 
-  sourceCsScript: {fileID: 11500000, guid: e925d4ee6258c094982be89ad9fce0f3, type: 3}
+  sourceCsScript: {fileID: 11500000, guid: 5e0fa6b1a370aa24195aff0f539e8334, type: 3}
   scriptVersion: 2
   compiledVersion: 2
   behaviourSyncMode: 0
   hasInteractEvent: 0
-  scriptID: 796956976416418203
+  scriptID: -787611420446930631
   serializationData:
     SerializedFormat: 2
     SerializedBytes: 
