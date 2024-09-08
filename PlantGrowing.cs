@@ -1,4 +1,4 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System;
 using TMPro;
 using UdonSharp;
 using UnityEngine;
@@ -10,15 +10,10 @@ public class PlantGrowing : UdonSharpBehaviour
 	// if changed, will apply on next growth cycle
 
 	[Header("configure crop")]
-	public string _cropTag;
 	public float _maxGrowTime;
 	public float _growSpeedMultiplier;
 	public int _maxGrowthPhase;
-
-	[Header("")]
 	public int _amountHarvested;
-	
-	[Header("")]
 	public GameObject _cropRoot;
 	public UdonSharpBehaviour _SceneReferences;
 
@@ -30,21 +25,21 @@ public class PlantGrowing : UdonSharpBehaviour
 	public Button _btnAutoWater;
 	public Button _btnAutoHarvest;
 	public Button _btnAutoPlant;
+	public Image _imgGrowingVisual;
 
 	[Header("INTERNAL")]
+	public string _cropTag;
 	public int _growthPhase = 0;
 	private float _currentgrowtime = 0;
-
 	public bool _autoWater = false;
 	public bool _autoHarvest = false;
 	public bool _autoPlant = false;
 
 	public void FixedUpdate()
 	{
-		// implicitely stops growth phases if _currentgrowtime is under 0.1f, creating a pause in growing without spamming that its stopped in FixedUpdate, without using bools 
-		// start growing again by setting to 0.1f
+		// set _currentgrowtime to 0.0f to temporarily halt growth phases
 
-		// simply an growing phase
+		// simply a growing phase
 		if (_currentgrowtime < _maxGrowTime && _currentgrowtime >= 0.1f)
 		{
 			Growing();
@@ -52,6 +47,8 @@ public class PlantGrowing : UdonSharpBehaviour
 
 		if (_currentgrowtime > _maxGrowTime)
 		{
+			// growth phase completed, check if its the last phase or needs water
+
 			// needs to be watered
 			if (_growthPhase < _maxGrowthPhase)
 			{
@@ -68,11 +65,23 @@ public class PlantGrowing : UdonSharpBehaviour
 		}
 	}
 
+	private double ConvertFrom_Range1_Input_To_Range2_Output(double _input_range_min,
+		double _input_range_max, double _output_range_min,
+		double _output_range_max, double _input_value_tobe_converted)
+	{
+		double diffOutputRange = Math.Abs((_output_range_max - _output_range_min));
+		double diffInputRange = Math.Abs((_input_range_max - _input_range_min));
+		double convFactor = (diffOutputRange / diffInputRange);
+		return (_output_range_min + (convFactor * (_input_value_tobe_converted - _input_range_min)));
+	}
+
 	// general logic for crop growing
 	private void Growing()
 	{
 		_currentgrowtime += Time.fixedDeltaTime;
 		_cropRoot.transform.localScale += new Vector3(Time.fixedDeltaTime* _growSpeedMultiplier, Time.fixedDeltaTime * _growSpeedMultiplier, Time.fixedDeltaTime * _growSpeedMultiplier);
+
+		_imgGrowingVisual.fillAmount = (float)ConvertFrom_Range1_Input_To_Range2_Output(0, _maxGrowTime, 0, 1, _currentgrowtime);
 
 		ButtonHandler(false, false, false);
 	}
@@ -93,6 +102,8 @@ public class PlantGrowing : UdonSharpBehaviour
 		// just stalling _currentgrowtime without reseting it to 0
 		_currentgrowtime = 0;
 
+		// either enabling the button to harvest, or checking if the upgrade is bought
+		// button is hidden once harvested automatically
 		ButtonHandler(false, false, true);
 
 		if (_autoHarvest == true)
@@ -115,30 +126,30 @@ public class PlantGrowing : UdonSharpBehaviour
 		// either here or on the button you can add logic involving tracking plant data or moneys to buy a new plant, etc.
 		_label.text = _cropTag;
 
-		int _cropCost = (int)_SceneReferences.GetProgramVariable("_cropCost");
-		int _currentMoney = (int)_SceneReferences.GetProgramVariable("_currentMoney");
+		//int _cropCost = (int)_SceneReferences.GetProgramVariable("_cropCost");
+		//int _currentMoney = (int)_SceneReferences.GetProgramVariable("_currentMoney");
 
 		if (_cropTag == "crop1")
 		{
-			int _costCrop1 = (int)_SceneReferences.GetProgramVariable("_costCrop1") + _cropCost;
-			if (_currentMoney >= _costCrop1)
+			int _costSeedCrop1 = (int)_SceneReferences.GetProgramVariable("_costSeedCrop1");
+			if (_costSeedCrop1 > 0)
 			{
-				
-				_SceneReferences.SetProgramVariable("_currentMoney", _currentMoney - _costCrop1);
+				_SceneReferences.SetProgramVariable("_costSeedCrop1", _costSeedCrop1 - 1);
 				StartGrowing();
 			}
 		}
 
 		if (_cropTag == "crop2")
 		{
-			int _costCrop2 = (int)_SceneReferences.GetProgramVariable("_costCrop2") + _cropCost;
-			if (_currentMoney >= _costCrop2)
-			{
 
-				_SceneReferences.SetProgramVariable("_currentMoney", _currentMoney - _costCrop2);
+			int _costSeedCrop2 = (int)_SceneReferences.GetProgramVariable("_costSeedCrop2");
+			if (_costSeedCrop2 > 0)
+			{
+				_SceneReferences.SetProgramVariable("_costSeedCrop2", _costSeedCrop2 - 1);
 				StartGrowing();
 			}
 		}
+
 		ButtonHandler(true, false, false);
 	}
 	private void StartGrowing()
@@ -193,9 +204,10 @@ public class PlantGrowing : UdonSharpBehaviour
 	{
 		int _money = (int)_SceneReferences.GetProgramVariable("_currentMoney");
 		int _cost = (int)_SceneReferences.GetProgramVariable("_costUpgradeAutoWater");
-		if (_cost < _money)
+		if (_cost <= _money)
 		{
 			_autoWater = true;
+			_SceneReferences.SetProgramVariable("_currentMoney", _money - _cost);
 			_btnAutoWater.interactable = false;
 		}
 	}
@@ -203,9 +215,10 @@ public class PlantGrowing : UdonSharpBehaviour
 	{
 		int _money = (int)_SceneReferences.GetProgramVariable("_currentMoney");
 		int _cost = (int)_SceneReferences.GetProgramVariable("_costUpgradeAutoHarvest");
-		if (_cost < _money)
+		if (_cost <= _money)
 		{
 			_autoHarvest = true;
+			_SceneReferences.SetProgramVariable("_currentMoney", _money - _cost);
 			_btnAutoHarvest.interactable = false;
 		}
 	}
@@ -213,9 +226,10 @@ public class PlantGrowing : UdonSharpBehaviour
 	{
 		int _money = (int)_SceneReferences.GetProgramVariable("_currentMoney");
 		int _cost = (int)_SceneReferences.GetProgramVariable("_costUpgradeAutoPlants");
-		if (_cost < _money)
+		if (_cost <= _money)
 		{
 			_autoPlant = true;
+			_SceneReferences.SetProgramVariable("_currentMoney", _money - _cost);
 			_btnAutoPlant.interactable = false;
 		}
 	}

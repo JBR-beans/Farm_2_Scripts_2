@@ -5,13 +5,13 @@ using UnityEngine;
 using VRC.SDKBase;
 using VRC.Udon;
 
-public class GameMenu : UdonSharpBehaviour
+public class SellCropMenu : UdonSharpBehaviour
 {
 	public string _cropTag;
 
     public UdonBehaviour _SceneReferences;
 
-    public int _amountCrop;
+    private int _amountCrop;
 
 	public TextMeshProUGUI _viewCropAmount;
     public void IncreaseCropAmount()
@@ -24,6 +24,7 @@ public class GameMenu : UdonSharpBehaviour
 				_amountCrop++;
 			}
 		}
+
 		if (_cropTag == (string)_SceneReferences.GetProgramVariable("_tagCrop2"))
 		{
 			int _currentCrop = (int)_SceneReferences.GetProgramVariable("_currentCrop2");
@@ -49,7 +50,7 @@ public class GameMenu : UdonSharpBehaviour
 
 		if (_cropTag == "crop1")
 		{
-			int _currentCrop1 = (int)_SceneReferences.GetProgramVariable("_currentCrop1");
+			int _currentCrop1 = (int)_SceneReferences.GetProgramVariable("_currentMoney");
 			int _valueCrops = (int)_SceneReferences.GetProgramVariable("_valueCrops");
 			int _valueCrop1 = (int)_SceneReferences.GetProgramVariable("_valueCrop1") + _valueCrops;
 			int _moneyEarned = _valueCrop1 * _amountCrop;
@@ -74,8 +75,29 @@ public class GameMenu : UdonSharpBehaviour
 		_amountCrop = 0;
 		_viewCropAmount.text = "0";
 	}
-	public void UpgradeSellPrice()
+	public void SellAll()
 	{
+		int _currentCrop1 = (int)_SceneReferences.GetProgramVariable("_currentCrop1");
+		int _currentCrop2 = (int)_SceneReferences.GetProgramVariable("_currentCrop2");
 
+		_amountCrop = _currentCrop2 + _currentCrop2;
+
+		int _currentMoney = (int)_SceneReferences.GetProgramVariable("_currentMoney");
+
+		int _totalMoney = (int)_SceneReferences.GetProgramVariable("_totalMoney");
+		int _valueCrops = (int)_SceneReferences.GetProgramVariable("_valueCrops");
+
+		int _valueCrop1 = (int)_SceneReferences.GetProgramVariable("_valueCrop1") + _valueCrops;
+		int _valueCrop2 = (int)_SceneReferences.GetProgramVariable("_valueCrop2") + _valueCrops;
+
+		int _moneyEarned = (_valueCrop1 * _currentCrop1) + (_valueCrop2 * _currentCrop2);
+
+		_SceneReferences.SetProgramVariable("_currentCrop2", 0);
+		_SceneReferences.SetProgramVariable("_currentCrop1", 0);
+
+		_SceneReferences.SetProgramVariable("_currentMoney", _currentMoney + _moneyEarned);
+		_SceneReferences.SetProgramVariable("_totalMoney", _totalMoney + _moneyEarned);
+
+		_amountCrop = 0;
 	}
 }

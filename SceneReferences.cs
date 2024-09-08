@@ -9,29 +9,7 @@ public class SceneReferences : UdonSharpBehaviour
 {
     // fields with "total" count lifetime, for example as achievement or to unlock things
     // duplicate crop to make more different plants
-    [Header("INTERNAL")]
-	[Header("global stats")]
-	public int _currentCrop = 0;
-    public int _totalCrop = 0;
-	public int _cropCost = 0;
-	public int _valueCrops = 0;
-	[Header("crop1")]
-	public string _tagCrop1 = "crop1";
-	public int _currentCrop1 = 0;
-	public int _totalCrop1 = 0;
-	public int _costCrop1 = 0;
-	public int _valueCrop1 = 0;
-	[Header("crop2")]
-	public string _tagCrop2 = "crop2";
-	public int _currentCrop2 = 0;
-	public int _totalCrop2 = 0;
-	public int _costCrop2 = 0;
-	public int _valueCrop2 = 0;
-	[Header("player stats")]
-	public int _currentMoney = 0;
-	[Header("totals")]
-	public int _totalMoney = 0;
-	public int _CropsPlanted = 0;
+
 	[Header("upgrade costs")]
 	public int _costUpgradeAutoWater;
 	public int _costUpgradeAutoHarvest;
@@ -39,22 +17,8 @@ public class SceneReferences : UdonSharpBehaviour
 	public int _costUpgradeCheaperCrops;
 	public int _costUpgradeCropValue;
 
-	[Header("HUD")]
-	public TextMeshProUGUI _hudCurrentCrop1;
-	public TextMeshProUGUI _hudCurrentCrop2;
-
-	public TextMeshProUGUI _hudTotalCrop1;
-	public TextMeshProUGUI _hudTotalCrop2;
-
-	public TextMeshProUGUI _hudCrop1CostValue;
-	public TextMeshProUGUI _hudCrop2CostValue;
-
-	public TextMeshProUGUI _hudCurrentMoney;
-	public TextMeshProUGUI _hudTotalMoney;
-	public TextMeshProUGUI _hudCropsPlanted;
-
-	public TextMeshProUGUI _hudCropsCost;
-	public TextMeshProUGUI _hudCropsValue;
+	[Header("Unlock costs")]
+	public int _costUnlockCrop2Plot;
 
 	public void FixedUpdate()
 	{
@@ -93,17 +57,66 @@ public class SceneReferences : UdonSharpBehaviour
 	// global upgrades applied to all crops at once
 	public void UpgradeCheaperCrops()
 	{
-		if (_currentMoney >= _costUpgradeCheaperCrops)
+		if (_currentMoney >= _costUpgradeCheaperCrops && _cropCost >= 0)
 		{
 			_cropCost--;
+			_currentMoney -= _costUpgradeCheaperCrops;
 		}
 	}
 
 	public void UpgradeCropValue()
 	{
-		if (_currentMoney >= _costUpgradeCropValue)
+		if (_currentMoney >= _costUpgradeCropValue && _valueCrops <= 5)
 		{
 			_valueCrops++;
+			_currentMoney -= _costUpgradeCropValue;
 		}
 	}
+
+	[Header("crop1")]
+	public string _tagCrop1 = "crop1";
+	public int _currentCrop1 = 0;
+	public int _totalCrop1 = 0;
+	public int _costCrop1 = 0;
+	public int _costSeedCrop1 = 0;
+	public int _valueCrop1 = 0;
+
+	[Header("crop2")]
+	public string _tagCrop2 = "crop2";
+	public int _currentCrop2 = 0;
+	public int _totalCrop2 = 0;
+	public int _costCrop2 = 0;
+	public int _costSeedCrop2 = 0;
+	public int _valueCrop2 = 0;
+
+
+	[Header("HUD")]
+	public TextMeshProUGUI _hudCurrentCrop1;
+	public TextMeshProUGUI _hudCurrentCrop2;
+
+	public TextMeshProUGUI _hudTotalCrop1;
+	public TextMeshProUGUI _hudTotalCrop2;
+
+	public TextMeshProUGUI _hudCrop1CostValue;
+	public TextMeshProUGUI _hudCrop2CostValue;
+
+	public TextMeshProUGUI _hudCurrentMoney;
+	public TextMeshProUGUI _hudTotalMoney;
+	public TextMeshProUGUI _hudCropsPlanted;
+
+	public TextMeshProUGUI _hudCropsCost;
+	public TextMeshProUGUI _hudCropsValue;
+
+
+	[Header("INTERNAL")]
+	[Header("global stats")]
+	public int _currentCrop = 0;
+	public int _totalCrop = 0;
+	public int _cropCost = 0;
+	public int _valueCrops = 0;
+	[Header("player stats")]
+	public int _currentMoney = 0;
+	[Header("totals")]
+	public int _totalMoney = 0;
+	public int _CropsPlanted = 0;
 }
