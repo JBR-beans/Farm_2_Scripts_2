@@ -69,16 +69,22 @@ public class SellCropMenu : UdonSharpBehaviour
 
 		if (_cropTag == "crop1")
 		{
-			int _currentCrop1 = (int)_SceneReferences.GetProgramVariable("_currentMoney");
+			int _currentCrop1 = (int)_SceneReferences.GetProgramVariable("_currentCrop1");
 
 			if (_currentCrop1 > 0)
 			{
-				int _valueCrop1 = (int)_SceneReferences.GetProgramVariable("_valueCrop1") + _valueCrops;
-				int _moneyEarned = _valueCrop1 * _amountCrop;
+				int _valueCrop1 = (int)_SceneReferences.GetProgramVariable("_valueCrop1");
+				_valueCrop1 += _valueCrops;
 
-				_SceneReferences.SetProgramVariable("_currentCrop1", _currentCrop1 - _amountCrop);
-				_SceneReferences.SetProgramVariable("_currentMoney", _currentMoney + _moneyEarned);
-				_SceneReferences.SetProgramVariable("_totalMoney", _totalMoney + _moneyEarned);
+				int _moneyEarned = _valueCrop1 * _amountCrop;
+				_currentMoney += _moneyEarned;
+				_totalMoney += _moneyEarned;
+
+				_currentCrop1 -= _amountCrop;
+
+				_SceneReferences.SetProgramVariable("_currentCrop1", _currentCrop1);
+				_SceneReferences.SetProgramVariable("_currentMoney", _currentMoney);
+				_SceneReferences.SetProgramVariable("_totalMoney", _totalMoney);
 
 				_shareduiaudiosource.PlayOneShot(_sfxUISoundSell, _sfxUIvolume);
 			}
@@ -91,12 +97,18 @@ public class SellCropMenu : UdonSharpBehaviour
 
 			if (_currentCrop2 > 0)
 			{
-				int _valueCrop2 = (int)_SceneReferences.GetProgramVariable("_valueCrop2") + _valueCrops;
-				int _moneyEarned = _valueCrop2 * _amountCrop;
+				int _valueCrop2 = (int)_SceneReferences.GetProgramVariable("_valueCrop2");
+				_valueCrop2 += _valueCrops;
 
-				_SceneReferences.SetProgramVariable("_currentCrop2", _currentCrop2 - _amountCrop);
-				_SceneReferences.SetProgramVariable("_currentMoney", _currentMoney + _moneyEarned);
-				_SceneReferences.SetProgramVariable("_totalMoney", _totalMoney + _moneyEarned);
+				int _moneyEarned = _valueCrop2 * _amountCrop;
+				_currentMoney += _moneyEarned;
+				_totalMoney += _moneyEarned;
+
+				_currentCrop2 -= _amountCrop;
+
+				_SceneReferences.SetProgramVariable("_currentCrop2", _currentCrop2);
+				_SceneReferences.SetProgramVariable("_currentMoney", _currentMoney);
+				_SceneReferences.SetProgramVariable("_totalMoney", _totalMoney);
 
 				_shareduiaudiosource.PlayOneShot(_sfxUISoundSell, _sfxUIvolume);
 			}
@@ -117,15 +129,19 @@ public class SellCropMenu : UdonSharpBehaviour
 		{
 			int _currentCrop1 = (int)_SceneReferences.GetProgramVariable("_currentCrop1");
 			_amountCrop = _currentCrop1;
+
 			if (_currentCrop1 > 0)
 			{
-				int _valueCrop1 = (int)_SceneReferences.GetProgramVariable("_valueCrop1") + _valueCrops;
+				int _valueCrop1 = (int)_SceneReferences.GetProgramVariable("_valueCrop1");
+				_valueCrop1 += _valueCrops;
+
 				int _moneyEarned = _valueCrop1 * _amountCrop;
-				
+				_currentMoney += _moneyEarned;
+				_totalMoney += _moneyEarned;
 
 				_SceneReferences.SetProgramVariable("_currentCrop1", 0);
-				_SceneReferences.SetProgramVariable("_currentMoney", _currentMoney + _moneyEarned);
-				_SceneReferences.SetProgramVariable("_totalMoney", _totalMoney + _moneyEarned);
+				_SceneReferences.SetProgramVariable("_currentMoney", _currentMoney);
+				_SceneReferences.SetProgramVariable("_totalMoney", _totalMoney);
 
 				_shareduiaudiosource.PlayOneShot(_sfxUISoundSell, _sfxUIvolume);
 			}
@@ -139,12 +155,16 @@ public class SellCropMenu : UdonSharpBehaviour
 
 			if (_currentCrop2 > 0)
 			{
-				int _valueCrop2 = (int)_SceneReferences.GetProgramVariable("_valueCrop2") + _valueCrops;
+				int _valueCrop2 = (int)_SceneReferences.GetProgramVariable("_valueCrop2");
+				_valueCrop2 += _valueCrops;
+
 				int _moneyEarned = _valueCrop2 * _amountCrop;
-				
+				_currentMoney += _moneyEarned;
+				_totalMoney += _moneyEarned;
+
 				_SceneReferences.SetProgramVariable("_currentCrop2",0);
-				_SceneReferences.SetProgramVariable("_currentMoney", _currentMoney + _moneyEarned);
-				_SceneReferences.SetProgramVariable("_totalMoney", _totalMoney + _moneyEarned);
+				_SceneReferences.SetProgramVariable("_currentMoney", _currentMoney);
+				_SceneReferences.SetProgramVariable("_totalMoney", _totalMoney);
 
 				_shareduiaudiosource.PlayOneShot(_sfxUISoundSell, _sfxUIvolume);
 			}
@@ -155,32 +175,41 @@ public class SellCropMenu : UdonSharpBehaviour
 	public void SellAll()
 	{
 		_shareduiaudiosource = (AudioSource)_SceneReferences.GetProgramVariable("_sfxSharedUIAudioSource");
+
 		int _currentCrop1 = (int)_SceneReferences.GetProgramVariable("_currentCrop1");
 		int _currentCrop2 = (int)_SceneReferences.GetProgramVariable("_currentCrop2");
 
-		_amountCrop = _currentCrop2 + _currentCrop2;
+		_amountCrop = _currentCrop2 + _currentCrop1;
 
 		if (_amountCrop > 0)
 		{
 			int _currentMoney = (int)_SceneReferences.GetProgramVariable("_currentMoney");
-
 			int _totalMoney = (int)_SceneReferences.GetProgramVariable("_totalMoney");
+
 			int _valueCrops = (int)_SceneReferences.GetProgramVariable("_valueCrops");
 
-			int _valueCrop1 = (int)_SceneReferences.GetProgramVariable("_valueCrop1") + _valueCrops;
-			int _valueCrop2 = (int)_SceneReferences.GetProgramVariable("_valueCrop2") + _valueCrops;
+			int _valueCrop1 = (int)_SceneReferences.GetProgramVariable("_valueCrop1");
+			_valueCrop1 += _valueCrops;
+			_valueCrop1 *= _currentCrop1;
 
-			int _moneyEarned = (_valueCrop1 * _currentCrop1) + (_valueCrop2 * _currentCrop2);
+			int _valueCrop2 = (int)_SceneReferences.GetProgramVariable("_valueCrop2");
+			_valueCrop2 += _valueCrops;
+			_valueCrop2 *= _currentCrop2;
+
+			_currentMoney += (_valueCrop1 + _valueCrop2);
+			_totalMoney += (_valueCrop1 + _valueCrop2);
 
 			_SceneReferences.SetProgramVariable("_currentCrop2", 0);
 			_SceneReferences.SetProgramVariable("_currentCrop1", 0);
 
-			_SceneReferences.SetProgramVariable("_currentMoney", _currentMoney + _moneyEarned);
-			_SceneReferences.SetProgramVariable("_totalMoney", _totalMoney + _moneyEarned);
+			_SceneReferences.SetProgramVariable("_currentMoney", _currentMoney);
+			_SceneReferences.SetProgramVariable("_totalMoney", _totalMoney);
 
 			_amountCrop = 0;
 
 			_shareduiaudiosource.PlayOneShot(_sfxUISoundSellAll, _sfxUIvolume);
+
+			
 		}
 	}
 }

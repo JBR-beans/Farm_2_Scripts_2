@@ -18,13 +18,13 @@ public class PlantGrowing : UdonSharpBehaviour
 	public UdonSharpBehaviour _SceneReferences;
 
 	[Header("configure UI")]
-	public TextMeshProUGUI _label;
 	public Button _btnPlant;
 	public Button _btnWater;
 	public Button _btnHarvest;
 	public Button _btnAutoWater;
 	public Button _btnAutoHarvest;
 	public Button _btnAutoPlant;
+	public Button _btnUpgradeYield;
 	public Image _imgGrowingVisual;
 
 	[Header("INTERNAL")]
@@ -34,6 +34,7 @@ public class PlantGrowing : UdonSharpBehaviour
 	public bool _autoWater = false;
 	public bool _autoHarvest = false;
 	public bool _autoPlant = false;
+	
 
 	public void FixedUpdate()
 	{
@@ -87,6 +88,8 @@ public class PlantGrowing : UdonSharpBehaviour
 	}
 	public void GrowthPhaseCompleted()
 	{
+		// while 0, growing is paused
+		// set to greater than 0.1f to start growing cycle again
 		_currentgrowtime = 0;
 
 		ButtonHandler(false, true, false);
@@ -124,7 +127,7 @@ public class PlantGrowing : UdonSharpBehaviour
 		// "plants" a new crop
 
 		// either here or on the button you can add logic involving tracking plant data or moneys to buy a new plant, etc.
-		_label.text = _cropTag;
+
 
 		//int _cropCost = (int)_SceneReferences.GetProgramVariable("_cropCost");
 		//int _currentMoney = (int)_SceneReferences.GetProgramVariable("_currentMoney");
@@ -234,8 +237,25 @@ public class PlantGrowing : UdonSharpBehaviour
 		}
 	}
 
+	public void UpgradeYield()
+	{
+		int _money = (int)_SceneReferences.GetProgramVariable("_currentMoney");
+		int _cost = (int)_SceneReferences.GetProgramVariable("_costUpgradeYield");
+		if (_cost <= _money)
+		{
+			if (_amountHarvested < 3)
+			{
+				_amountHarvested++;
+			}
+
+			_SceneReferences.SetProgramVariable("_currentMoney", _money - _cost);
+			_btnUpgradeYield.interactable = false;
+		}
+		
+	}
+
 	// set crop type tags
-	public void SetCropTypeCrop1()
+	/*public void SetCropTypeCrop1()
 	{
 		_cropTag = "crop1";
 		_label.text = _cropTag;
@@ -244,5 +264,5 @@ public class PlantGrowing : UdonSharpBehaviour
 	{
 		_cropTag = "crop2";
 		_label.text = _cropTag;
-	}
+	}*/
 }

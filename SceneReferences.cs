@@ -16,6 +16,7 @@ public class SceneReferences : UdonSharpBehaviour
 	public int _costUpgradeAutoPlants;
 	public int _costUpgradeCheaperCrops;
 	public int _costUpgradeCropValue;
+	public int _costUpgradeYield;
 
 	[Header("Unlock costs")]
 	public int _costUnlockCrop2Plot;
