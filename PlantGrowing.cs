@@ -131,10 +131,10 @@ public class PlantGrowing : UdonSharpBehaviour
 
 		if (_cropTag == "crop1")
 		{
-			int _costSeedCrop1 = (int)_SceneReferences.GetProgramVariable("_costSeedCrop1");
-			if (_costSeedCrop1 > 0)
+			int _seedCrop1 = (int)_SceneReferences.GetProgramVariable("_seedCrop1");
+			if (_seedCrop1 > 0)
 			{
-				_SceneReferences.SetProgramVariable("_costSeedCrop1", _costSeedCrop1 - 1);
+				_SceneReferences.SetProgramVariable("_seedCrop1", _seedCrop1 - 1);
 				StartGrowing();
 			}
 		}
@@ -142,10 +142,10 @@ public class PlantGrowing : UdonSharpBehaviour
 		if (_cropTag == "crop2")
 		{
 
-			int _costSeedCrop2 = (int)_SceneReferences.GetProgramVariable("_costSeedCrop2");
-			if (_costSeedCrop2 > 0)
+			int _seedCrop2 = (int)_SceneReferences.GetProgramVariable("_seedCrop2");
+			if (_seedCrop2 > 0)
 			{
-				_SceneReferences.SetProgramVariable("_costSeedCrop2", _costSeedCrop2 - 1);
+				_SceneReferences.SetProgramVariable("_seedCrop2", _seedCrop2 - 1);
 				StartGrowing();
 			}
 		}
