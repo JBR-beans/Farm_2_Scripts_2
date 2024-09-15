@@ -17,6 +17,11 @@ public class PlantGrowing : UdonSharpBehaviour
 	public GameObject _cropRoot;
 	public UdonSharpBehaviour _SceneReferences;
 
+	public GameObject _meshHarvested;
+	public GameObject _meshPlanted;
+	public GameObject _meshWaterTrigger;
+	public GameObject _meshHarvestTrigger;
+
 	[Header("configure UI")]
 	public Button _btnPlant;
 	public Button _btnWater;
@@ -91,11 +96,12 @@ public class PlantGrowing : UdonSharpBehaviour
 		// while 0, growing is paused
 		// set to greater than 0.1f to start growing cycle again
 		_currentgrowtime = 0;
-
+		_meshWaterTrigger.SetActive(true);
 		ButtonHandler(false, true, false);
 
 		if (_autoWater == true)
 		{
+			_meshWaterTrigger.SetActive(false);
 			WaterPlant();
 		}
 
@@ -108,10 +114,11 @@ public class PlantGrowing : UdonSharpBehaviour
 		// either enabling the button to harvest, or checking if the upgrade is bought
 		// button is hidden once harvested automatically
 		ButtonHandler(false, false, true);
-
+		_meshHarvestTrigger.SetActive(true);
 		if (_autoHarvest == true)
 		{
 			HarvestPlant();
+			_meshHarvestTrigger.SetActive(false);
 		}
 	}
 	private void ButtonHandler(bool plant, bool water, bool harvest)
@@ -131,7 +138,8 @@ public class PlantGrowing : UdonSharpBehaviour
 
 		//int _cropCost = (int)_SceneReferences.GetProgramVariable("_cropCost");
 		//int _currentMoney = (int)_SceneReferences.GetProgramVariable("_currentMoney");
-
+		_meshPlanted.SetActive(true);
+		_meshHarvested.SetActive(false);
 		if (_cropTag == "crop1")
 		{
 			int _seedCrop1 = (int)_SceneReferences.GetProgramVariable("_seedCrop1");
@@ -163,6 +171,7 @@ public class PlantGrowing : UdonSharpBehaviour
 	}
 	public void WaterPlant()
 	{
+		_meshWaterTrigger.SetActive(false);
 		ButtonHandler(false, false, false);
 		_currentgrowtime = 0.1f;
 		_growthPhase++;
@@ -173,6 +182,10 @@ public class PlantGrowing : UdonSharpBehaviour
 		_cropRoot.transform.localScale = new Vector3(0.1f, 0.1f, 0.1f);
 		int _CropsPlanted = (int)_SceneReferences.GetProgramVariable("_CropsPlanted");
 		ButtonHandler(true, false, false);
+
+		_meshPlanted.SetActive(false);
+		_meshHarvested.SetActive(true);
+		_meshHarvestTrigger.SetActive(false);
 
 		if (_cropTag == "crop1")
 		{
