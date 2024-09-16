@@ -130,4 +130,6 @@ public class SceneReferences : UdonSharpBehaviour
 	[Header("totals")]
 	public int _totalMoney = 0;
 	public int _CropsPlanted = 0;
+	[Header("Unlockables")]
+	public bool _unlockedAutoBot = false;
 }

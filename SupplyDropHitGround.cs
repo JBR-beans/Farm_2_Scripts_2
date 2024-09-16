@@ -7,6 +7,8 @@ using VRC.Udon;
 public class SupplyDropHitGround : UdonSharpBehaviour
 {
 	public GameObject _Item;
+	public bool _additionalItemEnabled;
+	public GameObject _additionalItem;
 	public GameObject _PS1;
 	public GameObject _PS2;
 	public void OnCollisionEnter(Collision collision)
@@ -16,6 +18,10 @@ public class SupplyDropHitGround : UdonSharpBehaviour
 		_Item.SetActive(true);
 		_PS1.SetActive(true);
 		_PS2.SetActive(true);
+		if (_additionalItemEnabled == true)
+		{
+			_additionalItem.SetActive(true);
+		}
 		this.gameObject.SetActive(false);
 	}
 }

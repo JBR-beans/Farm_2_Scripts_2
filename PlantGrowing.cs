@@ -22,6 +22,10 @@ public class PlantGrowing : UdonSharpBehaviour
 	public GameObject _meshWaterTrigger;
 	public GameObject _meshHarvestTrigger;
 
+	[Header("configure VFX/SFX")]
+	public ParticleSystem _particlesDirt;
+	public ParticleSystem _particlesCrop;
+
 	[Header("configure UI")]
 	public Button _btnPlant;
 	public Button _btnWater;
@@ -39,7 +43,6 @@ public class PlantGrowing : UdonSharpBehaviour
 	public bool _autoWater = false;
 	public bool _autoHarvest = false;
 	public bool _autoPlant = false;
-	
 
 	public void FixedUpdate()
 	{
@@ -160,7 +163,7 @@ public class PlantGrowing : UdonSharpBehaviour
 				StartGrowing();
 			}
 		}
-
+		_particlesDirt.Play();
 		ButtonHandler(true, false, false);
 	}
 	private void StartGrowing()
@@ -183,8 +186,7 @@ public class PlantGrowing : UdonSharpBehaviour
 		int _CropsPlanted = (int)_SceneReferences.GetProgramVariable("_CropsPlanted");
 		ButtonHandler(true, false, false);
 
-		_meshPlanted.SetActive(false);
-		_meshHarvested.SetActive(true);
+		
 		_meshHarvestTrigger.SetActive(false);
 
 		if (_cropTag == "crop1")
@@ -207,12 +209,38 @@ public class PlantGrowing : UdonSharpBehaviour
 			_SceneReferences.SetProgramVariable("_totalCrop2", _totalCrop2 + _amountHarvested);
 		}
 
-		
-		if (_autoPlant == true)
-		{
-			ResetPlant();
-		}
+		_particlesCrop.Play();
+
+
+		_cycleReseting = true;
+
 		_SceneReferences.SetProgramVariable("_CropsPlanted", _CropsPlanted + 1);
+	}
+
+	private float _ticker = 0;
+	private bool _cycleReseting;
+	public float _maxTimeCropReset;
+	public Image _imgResetingVisual;
+	public void Update()
+	{
+		if (_cycleReseting == true)
+		{
+			_ticker += Time.deltaTime;
+
+			_imgResetingVisual.fillAmount = (float)ConvertFrom_Range1_Input_To_Range2_Output(0, _maxTimeCropReset, 0, 1, _ticker);
+
+			if (_ticker > _maxTimeCropReset)
+			{
+				_meshPlanted.SetActive(false);
+				_meshHarvested.SetActive(true);
+				_cycleReseting = false;
+				_ticker = 0;
+				if (_autoPlant == true)
+				{
+					ResetPlant();
+				}
+			}
+		}
 	}
 
 	// upgrades per local crop plot
