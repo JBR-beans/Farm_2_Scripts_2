@@ -9,6 +9,8 @@ public class PlantGrowing : UdonSharpBehaviour
 	// crop tag is set immediately before reseting plant
 	// if changed, will apply on next growth cycle
 
+	[Header("Modifiers")]
+	public bool _useSeeds;
 	[Header("configure crop")]
 	public float _maxGrowTime;
 	public float _growSpeedMultiplier;
@@ -25,6 +27,9 @@ public class PlantGrowing : UdonSharpBehaviour
 	[Header("configure VFX/SFX")]
 	public ParticleSystem _particlesDirt;
 	public ParticleSystem _particlesCrop;
+	public AudioSource _sfxSource;
+	public AudioClip _sfxClipHarvest;
+	public AudioClip _sfxClipPlanted;
 
 	[Header("configure UI")]
 	public Button _btnPlant;
@@ -34,7 +39,17 @@ public class PlantGrowing : UdonSharpBehaviour
 	public Button _btnAutoHarvest;
 	public Button _btnAutoPlant;
 	public Button _btnUpgradeYield;
+
+	[Header("Indicators")]
 	public Image _imgGrowingVisual;
+	public Image _imgResetingVisual;
+
+	// interact with to attempt ResetPlant()
+	// if unsuccessful, can be reattempted
+	// if successful, disables popup
+	public GameObject _popupOutOfSeeds;
+	public GameObject _popupNeedsWater;
+	public GameObject _popupReadyToHarvest;
 
 	[Header("INTERNAL")]
 	public string _cropTag;
@@ -44,6 +59,43 @@ public class PlantGrowing : UdonSharpBehaviour
 	public bool _autoHarvest = false;
 	public bool _autoPlant = false;
 
+	private float _ticker = 0;
+	private bool _cycleReseting;
+	[Header("Max time til crop can be planted again")]
+	public float _maxTimeCropReset;
+	
+	public void Update()
+	{
+		if (_cycleReseting == true)
+		{
+			_imgResetingVisual.color = Color.red;
+			_ticker += Time.deltaTime;
+
+			_imgResetingVisual.fillAmount = (float)ConvertFrom_Range1_Input_To_Range2_Output(0, _maxTimeCropReset, 0, 1, _ticker);
+			_imgGrowingVisual.fillAmount = 0;
+
+			if (_ticker > _maxTimeCropReset)
+			{
+				_meshPlanted.SetActive(false);
+				_meshHarvested.SetActive(true);
+				
+				_cycleReseting = false;
+				_ticker = 0;
+
+				ReadyToPlant();
+
+				if (_autoPlant == true)
+				{
+					ResetPlant();
+				}
+			}
+		}
+	}
+	public void ReadyToPlant()
+	{
+		// using this in place of a reusable checkmark for now
+		_imgResetingVisual.color = Color.green;
+	}
 	public void FixedUpdate()
 	{
 		// set _currentgrowtime to 0.0f to temporarily halt growth phases
@@ -68,19 +120,18 @@ public class PlantGrowing : UdonSharpBehaviour
 			if (_growthPhase == _maxGrowthPhase)
 			{
 				LastGrowthPhase();
-				
-				//HarvestPlant();
 			}
 		}
 	}
 
-	private double ConvertFrom_Range1_Input_To_Range2_Output(double _input_range_min,
-		double _input_range_max, double _output_range_min,
-		double _output_range_max, double _input_value_tobe_converted)
+	private double ConvertFrom_Range1_Input_To_Range2_Output(double _input_range_min, double _input_range_max, double _output_range_min, double _output_range_max, double _input_value_tobe_converted)
 	{
 		double diffOutputRange = Math.Abs((_output_range_max - _output_range_min));
+
 		double diffInputRange = Math.Abs((_input_range_max - _input_range_min));
+
 		double convFactor = (diffOutputRange / diffInputRange);
+
 		return (_output_range_min + (convFactor * (_input_value_tobe_converted - _input_range_min)));
 	}
 
@@ -91,16 +142,22 @@ public class PlantGrowing : UdonSharpBehaviour
 		_cropRoot.transform.localScale += new Vector3(Time.fixedDeltaTime* _growSpeedMultiplier, Time.fixedDeltaTime * _growSpeedMultiplier, Time.fixedDeltaTime * _growSpeedMultiplier);
 
 		_imgGrowingVisual.fillAmount = (float)ConvertFrom_Range1_Input_To_Range2_Output(0, _maxGrowTime, 0, 1, _currentgrowtime);
+		_imgResetingVisual.fillAmount = 0;
 
 		ButtonHandler(false, false, false);
 	}
+
+	
 	public void GrowthPhaseCompleted()
 	{
 		// while 0, growing is paused
 		// set to greater than 0.1f to start growing cycle again
 		_currentgrowtime = 0;
 		_meshWaterTrigger.SetActive(true);
+		_popupNeedsWater.SetActive(true);
 		ButtonHandler(false, true, false);
+		_imgGrowingVisual.fillAmount = 0;
+		_imgResetingVisual.fillAmount = 0;
 
 		if (_autoWater == true)
 		{
@@ -109,6 +166,7 @@ public class PlantGrowing : UdonSharpBehaviour
 		}
 
 	}
+	
 	public void LastGrowthPhase()
 	{
 		// just stalling _currentgrowtime without reseting it to 0
@@ -118,6 +176,10 @@ public class PlantGrowing : UdonSharpBehaviour
 		// button is hidden once harvested automatically
 		ButtonHandler(false, false, true);
 		_meshHarvestTrigger.SetActive(true);
+		_popupReadyToHarvest.SetActive(true);
+		_imgGrowingVisual.fillAmount = 0;
+		_imgResetingVisual.fillAmount = 0;
+
 		if (_autoHarvest == true)
 		{
 			HarvestPlant();
@@ -130,50 +192,116 @@ public class PlantGrowing : UdonSharpBehaviour
 		_btnWater.gameObject.SetActive(water);
 		_btnHarvest.gameObject.SetActive(harvest);
 	}
-
+	
 	// public custom events to be called by buttons
 	public void ResetPlant()
 	{
 		// "plants" a new crop
-
-		// either here or on the button you can add logic involving tracking plant data or moneys to buy a new plant, etc.
-
-
-		//int _cropCost = (int)_SceneReferences.GetProgramVariable("_cropCost");
-		//int _currentMoney = (int)_SceneReferences.GetProgramVariable("_currentMoney");
-		_meshPlanted.SetActive(true);
-		_meshHarvested.SetActive(false);
-		if (_cropTag == "crop1")
+		if (_useSeeds == true)
 		{
-			int _seedCrop1 = (int)_SceneReferences.GetProgramVariable("_seedCrop1");
-			if (_seedCrop1 > 0)
+			switch (_cropTag)
 			{
-				_SceneReferences.SetProgramVariable("_seedCrop1", _seedCrop1 - 1);
-				StartGrowing();
+				case "crop1":
+
+					int _seedCrop1 = (int)_SceneReferences.GetProgramVariable("_seedCrop1");
+					if (_seedCrop1 > 0)
+					{
+						_SceneReferences.SetProgramVariable("_seedCrop1", _seedCrop1 - 1);
+						StartGrowing();
+					}
+					if (_seedCrop1 <= 0)
+					{
+
+						_popupOutOfSeeds.SetActive(true);
+					}
+					_sfxSource.PlayOneShot(_sfxClipPlanted);
+
+					break;
+
+				case "crop2":
+
+					int _seedCrop2 = (int)_SceneReferences.GetProgramVariable("_seedCrop2");
+					if (_seedCrop2 > 0)
+					{
+						_SceneReferences.SetProgramVariable("_seedCrop2", _seedCrop2 - 1);
+						StartGrowing();
+					}
+					if (_seedCrop2 <= 0)
+					{
+						_popupOutOfSeeds.SetActive(true);
+					}
+					_sfxSource.PlayOneShot(_sfxClipPlanted);
+					break;
+
+				case "crop3":
+
+					int _seedCrop3 = (int)_SceneReferences.GetProgramVariable("_seedCrop3");
+					if (_seedCrop3 > 0)
+					{
+						_SceneReferences.SetProgramVariable("_seedCrop3", _seedCrop3 - 1);
+						StartGrowing();
+					}
+					if (_seedCrop3 <= 0)
+					{
+						_popupOutOfSeeds.SetActive(true);
+					}
+					_sfxSource.PlayOneShot(_sfxClipPlanted);
+					break;
+
+				case "crop4":
+
+					int _seedCrop4 = (int)_SceneReferences.GetProgramVariable("_seedCrop4");
+					if (_seedCrop4 > 0)
+					{
+						_SceneReferences.SetProgramVariable("_seedCrop4", _seedCrop4 - 1);
+						StartGrowing();
+					}
+					if (_seedCrop4 <= 0)
+					{
+						_popupOutOfSeeds.SetActive(true);
+					}
+					_sfxSource.PlayOneShot(_sfxClipPlanted);
+					break;
+
+				case "crop5":
+
+					int _seedCrop5 = (int)_SceneReferences.GetProgramVariable("_seedCrop5");
+					if (_seedCrop5 > 0)
+					{
+						_SceneReferences.SetProgramVariable("_seedCrop5", _seedCrop5 - 1);
+						StartGrowing();
+					}
+					if (_seedCrop5 <= 0)
+					{
+						_popupOutOfSeeds.SetActive(true);
+					}
+					_sfxSource.PlayOneShot(_sfxClipPlanted);
+					break;
+
 			}
 		}
-
-		if (_cropTag == "crop2")
+		else
 		{
-
-			int _seedCrop2 = (int)_SceneReferences.GetProgramVariable("_seedCrop2");
-			if (_seedCrop2 > 0)
-			{
-				_SceneReferences.SetProgramVariable("_seedCrop2", _seedCrop2 - 1);
-				StartGrowing();
-			}
+			StartGrowing();
 		}
-		_particlesDirt.Play();
+		
 		ButtonHandler(true, false, false);
 	}
 	private void StartGrowing()
 	{
+		_meshPlanted.SetActive(true);
+		_meshHarvested.SetActive(false);
+		_popupOutOfSeeds.SetActive(false);
 		_currentgrowtime = 0.1f;
 		_growthPhase = 0;
+		_particlesDirt.Play();
 		ButtonHandler(false, false, false);
+
+		// triggers Growing() implicitely because _currentgrowtime is greater than 0
 	}
 	public void WaterPlant()
 	{
+		_popupNeedsWater.SetActive(false);
 		_meshWaterTrigger.SetActive(false);
 		ButtonHandler(false, false, false);
 		_currentgrowtime = 0.1f;
@@ -186,28 +314,70 @@ public class PlantGrowing : UdonSharpBehaviour
 		int _CropsPlanted = (int)_SceneReferences.GetProgramVariable("_CropsPlanted");
 		ButtonHandler(true, false, false);
 
-		
+		_sfxSource.PlayOneShot(_sfxClipHarvest);
 		_meshHarvestTrigger.SetActive(false);
+		_popupReadyToHarvest.SetActive(false);
 
-		if (_cropTag == "crop1")
+		switch (_cropTag)
 		{
-			int _currentCrop1 = (int)_SceneReferences.GetProgramVariable("_currentCrop1");
-			int _totalCrop1 = (int)_SceneReferences.GetProgramVariable("_totalCrop1");
+			case "crop1":
 
-			// add logic for what happens with the harvested plants data
-			_SceneReferences.SetProgramVariable("_currentCrop1", _currentCrop1 + _amountHarvested);
-			_SceneReferences.SetProgramVariable("_totalCrop1", _totalCrop1 + _amountHarvested);
-			
+				int _currentCrop1 = (int)_SceneReferences.GetProgramVariable("_currentCrop1");
+				int _totalCrop1 = (int)_SceneReferences.GetProgramVariable("_totalCrop1");
+
+				// add logic for what happens with the harvested plants data
+				_SceneReferences.SetProgramVariable("_currentCrop1", _currentCrop1 + _amountHarvested);
+				_SceneReferences.SetProgramVariable("_totalCrop1", _totalCrop1 + _amountHarvested);
+
+				break;
+
+			case "crop2":
+
+				int _currentCrop2 = (int)_SceneReferences.GetProgramVariable("_currentCrop2");
+				int _totalCrop2 = (int)_SceneReferences.GetProgramVariable("_totalCrop2");
+
+				// add logic for what happens with the harvested plants data
+				_SceneReferences.SetProgramVariable("_currentCrop2", _currentCrop2 + _amountHarvested);
+				_SceneReferences.SetProgramVariable("_totalCrop2", _totalCrop2 + _amountHarvested);
+
+				break;
+
+			case "crop3":
+
+				int _currentCrop3 = (int)_SceneReferences.GetProgramVariable("_currentCrop3");
+				int _totalCrop3 = (int)_SceneReferences.GetProgramVariable("_totalCrop3");
+
+				// add logic for what happens with the harvested plants data
+				_SceneReferences.SetProgramVariable("_currentCrop3", _currentCrop3 + _amountHarvested);
+				_SceneReferences.SetProgramVariable("_totalCrop3", _totalCrop3 + _amountHarvested);
+
+				break;
+
+			case "crop4":
+
+				int _currentCrop4 = (int)_SceneReferences.GetProgramVariable("_currentCrop4");
+				int _totalCrop4 = (int)_SceneReferences.GetProgramVariable("_totalCrop4");
+
+				// add logic for what happens with the harvested plants data
+				_SceneReferences.SetProgramVariable("_currentCrop4", _currentCrop4 + _amountHarvested);
+				_SceneReferences.SetProgramVariable("_totalCrop4", _totalCrop4 + _amountHarvested);
+
+				break;
+
+			case "crop5":
+
+				int _currentCrop5 = (int)_SceneReferences.GetProgramVariable("_currentCrop5");
+				int _totalCrop5 = (int)_SceneReferences.GetProgramVariable("_totalCrop5");
+
+				// add logic for what happens with the harvested plants data
+				_SceneReferences.SetProgramVariable("_currentCrop5", _currentCrop5 + _amountHarvested);
+				_SceneReferences.SetProgramVariable("_totalCrop5", _totalCrop5 + _amountHarvested);
+
+
+				break;
+
 		}
 		
-		if (_cropTag == "crop2")
-		{
-			int _currentCrop2 = (int)_SceneReferences.GetProgramVariable("_currentCrop2");
-			int _totalCrop2 = (int)_SceneReferences.GetProgramVariable("_totalCrop2");
-
-			_SceneReferences.SetProgramVariable("_currentCrop2", _currentCrop2 + _amountHarvested);
-			_SceneReferences.SetProgramVariable("_totalCrop2", _totalCrop2 + _amountHarvested);
-		}
 
 		_particlesCrop.Play();
 
@@ -215,32 +385,6 @@ public class PlantGrowing : UdonSharpBehaviour
 		_cycleReseting = true;
 
 		_SceneReferences.SetProgramVariable("_CropsPlanted", _CropsPlanted + 1);
-	}
-
-	private float _ticker = 0;
-	private bool _cycleReseting;
-	public float _maxTimeCropReset;
-	public Image _imgResetingVisual;
-	public void Update()
-	{
-		if (_cycleReseting == true)
-		{
-			_ticker += Time.deltaTime;
-
-			_imgResetingVisual.fillAmount = (float)ConvertFrom_Range1_Input_To_Range2_Output(0, _maxTimeCropReset, 0, 1, _ticker);
-
-			if (_ticker > _maxTimeCropReset)
-			{
-				_meshPlanted.SetActive(false);
-				_meshHarvested.SetActive(true);
-				_cycleReseting = false;
-				_ticker = 0;
-				if (_autoPlant == true)
-				{
-					ResetPlant();
-				}
-			}
-		}
 	}
 
 	// upgrades per local crop plot
@@ -294,16 +438,4 @@ public class PlantGrowing : UdonSharpBehaviour
 		}
 		
 	}
-
-	// set crop type tags
-	/*public void SetCropTypeCrop1()
-	{
-		_cropTag = "crop1";
-		_label.text = _cropTag;
-	}
-	public void SetCropTypeCrop2()
-	{
-		_cropTag = "crop2";
-		_label.text = _cropTag;
-	}*/
 }

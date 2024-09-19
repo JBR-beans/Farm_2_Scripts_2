@@ -16,16 +16,13 @@ public class BuySupplyCrateItem : UdonSharpBehaviour
     public UdonBehaviour _SceneReferences;
     public TextMeshProUGUI _title;
 
-    [Header("currently unused")]
-	public string _unlockedName;
-	public UdonBehaviour[] _scriptsOnCrops;
-
     [Header("INTERNAL")]
     public AudioSource _sfxSharedUIAudioSource;
 
 	public void ActivateSupplyCrate()
     {
         int _currentMoney = (int)_SceneReferences.GetProgramVariable("_currentMoney");
+
         if (_currentMoney >= _Cost)
         {
 			_PS1.SetActive(false);
@@ -41,13 +38,4 @@ public class BuySupplyCrateItem : UdonSharpBehaviour
             //SetUnlockedStatus();
 		}
 	}
-
-    /*public void SetUnlockedStatus()
-    {
-		foreach (UdonBehaviour script in _scriptsOnCrops)
-        {
-            script.SetProgramVariable(_unlockedName, true);
-		}
-
-	}*/
 }
