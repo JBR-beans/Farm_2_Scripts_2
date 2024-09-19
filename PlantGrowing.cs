@@ -27,9 +27,11 @@ public class PlantGrowing : UdonSharpBehaviour
 	[Header("configure VFX/SFX")]
 	public ParticleSystem _particlesDirt;
 	public ParticleSystem _particlesCrop;
+	public ParticleSystem _particleWater;
 	public AudioSource _sfxSource;
 	public AudioClip _sfxClipHarvest;
 	public AudioClip _sfxClipPlanted;
+	public AudioClip _sfxClipWatered;
 
 	[Header("configure UI")]
 	public Button _btnPlant;
@@ -162,6 +164,8 @@ public class PlantGrowing : UdonSharpBehaviour
 		if (_autoWater == true)
 		{
 			_meshWaterTrigger.SetActive(false);
+			_sfxSource.PlayOneShot(_sfxClipWatered);
+			_particleWater.Play();
 			WaterPlant();
 		}
 
@@ -283,6 +287,7 @@ public class PlantGrowing : UdonSharpBehaviour
 		else
 		{
 			StartGrowing();
+			_sfxSource.PlayOneShot(_sfxClipPlanted);
 		}
 		
 		ButtonHandler(true, false, false);
