@@ -457,10 +457,11 @@ public class SellCropMenu : UdonSharpBehaviour
 
 			if (_totalvalue > 100)
 			{
+				Single s = 100;
 				emission.SetBursts(
 			new ParticleSystem.Burst[]
 			{
-				new ParticleSystem.Burst(0.0f, 100)
+				new ParticleSystem.Burst(0.0f, s)
 			});
 			}
 

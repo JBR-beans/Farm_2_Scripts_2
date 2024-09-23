@@ -20,11 +20,17 @@ public class SupplyDropHitGround : UdonSharpBehaviour
 	public AudioClip _sfxClip;
 	public void OnCollisionEnter(Collision collision)
 	{
+		_PS1.SetActive(false);
+		_PS2.SetActive(false);
+
 		_PS1.transform.transform.position = transform.position;
 		_PS2.transform.transform.position = transform.position;
+
 		_Item.SetActive(true);
+
 		_PS1.SetActive(true);
 		_PS2.SetActive(true);
+
 		if (_additionalItemEnabled == true)
 		{
 			_additionalItem.SetActive(true);
@@ -37,7 +43,9 @@ public class SupplyDropHitGround : UdonSharpBehaviour
 				go.SetActive(true);
 			}
 		}
+
 		_sfxCrate.PlayOneShot(_sfxClip);
+
 		this.gameObject.SetActive(false);
 	}
 }
