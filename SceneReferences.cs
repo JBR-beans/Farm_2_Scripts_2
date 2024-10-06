@@ -58,6 +58,7 @@ public class SceneReferences : UdonSharpBehaviour
 	public AudioClip _sfxBuy1;
 	public AudioClip _sfxBoughtItem;
 	public TextMeshProUGUI _hudCheaperCropsUpgradeBought;
+	public int _totalAutoBot = 0;
 
 	[Header("HUD")]
 	[Header("Display current crop amounts")]

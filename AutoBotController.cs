@@ -15,38 +15,43 @@ public class AutoBotController : UdonSharpBehaviour
 	{
         _animator = GetComponent<Animator>();
 	}
-
-	public void PlayAnim()
-    {
-		_animator.Play(_animStateName);
+	public void ResetParameters()
+	{
+		foreach (AnimatorControllerParameter p in _animator.parameters)
+		{
+			_animator.SetBool(p.name, false);
+		}
 	}
-
 	public void PlayIdle()
 	{
-		//_animator.Play("test");
 		ResetParameters();
 		_animator.SetBool("isIdle", true);
 	}
 
 	public void PlayPlanting()
 	{
-		//_animator.Play("TestPlant");
 		ResetParameters();
 		_animator.SetBool("isPlanting", true);
 	}
 
+	public void PlayWatering()
+	{
+		ResetParameters();
+		_animator.SetBool("isWatering", true);
+	}
+	public void PlayHarvesting()
+	{
+		ResetParameters();
+		_animator.SetBool("isHarvesting", true);
+	}
+
+
+
 	public void PlayBreakTime()
 	{
-		//_animator.Play("BreakTime");
 		ResetParameters();
 		_animator.SetBool("isBreakTime", true);
 	}
 
-	public void ResetParameters()
-	{
-		foreach(AnimatorControllerParameter p in _animator.parameters)
-		{
-			_animator.SetBool(p.name, false);
-		}
-	}
+	
 }

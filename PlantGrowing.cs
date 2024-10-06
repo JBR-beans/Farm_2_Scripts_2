@@ -6,11 +6,10 @@ using UnityEngine.UI;
 
 public class PlantGrowing : UdonSharpBehaviour
 {
-	// crop tag is set immediately before reseting plant
-	// if changed, will apply on next growth cycle
 
-	[Header("Modifiers/unused")]
+	[Header("Modifiers")]
 	public bool _useSeeds;
+
 
 	[Header("configure crop")]
 	public string _cropTag;
@@ -37,9 +36,10 @@ public class PlantGrowing : UdonSharpBehaviour
 	public int _upgradeCostAutoHarvest;
 
 	[Header("changed in script")]
-	public bool _autoWater = false;
-	public bool _autoHarvest = false;
-	public bool _autoPlant = false;
+	public bool _isAutoBotActive;
+	//public bool _autoWater = false;
+	//public bool _autoHarvest = false;
+	//public bool _autoPlant = false;
 
 	[Header("Mesh triggers")]
 	public GameObject _meshHarvested;
@@ -69,9 +69,6 @@ public class PlantGrowing : UdonSharpBehaviour
 	public Image _imgGrowingVisual;
 	public Image _imgResetingVisual;
 
-	// interact with to attempt ResetPlant()
-	// if unsuccessful, can be reattempted
-	// if successful, disables popup
 	public GameObject _popupOutOfSeeds;
 	public GameObject _popupNeedsWater;
 	public GameObject _popupReadyToHarvest;
@@ -83,12 +80,10 @@ public class PlantGrowing : UdonSharpBehaviour
 	private bool _cycleReseting;
 	
 	
-	public void Update()
+	public void FixedUpdate()
 	{
 
 		// set _currentgrowtime to 0.0f to temporarily halt growth phases
-
-		// simply a growing phase
 		if (_currentgrowtime < _maxGrowTime && _currentgrowtime >= 0.1f)
 		{
 			Growing();
@@ -96,8 +91,6 @@ public class PlantGrowing : UdonSharpBehaviour
 
 		if (_currentgrowtime > _maxGrowTime)
 		{
-			// growth phase completed, check if its the last phase or needs water
-
 			// needs to be watered
 			if (_growthPhase <= _maxGrowthPhase)
 			{
@@ -110,8 +103,6 @@ public class PlantGrowing : UdonSharpBehaviour
 				LastGrowthPhase();
 			}
 		}
-
-
 
 		if (_cycleReseting == true)
 		{
@@ -131,7 +122,7 @@ public class PlantGrowing : UdonSharpBehaviour
 
 				ReadyToPlant();
 
-				if (_autoPlant == true)
+				if (_isAutoBotActive == true)
 				{
 					ResetPlant();
 				}
@@ -140,7 +131,6 @@ public class PlantGrowing : UdonSharpBehaviour
 	}
 	public void ReadyToPlant()
 	{
-		// using this in place of a reusable checkmark for now
 		_imgResetingVisual.color = Color.green;
 	}
 
@@ -155,7 +145,6 @@ public class PlantGrowing : UdonSharpBehaviour
 		return (_output_range_min + (convFactor * (_input_value_tobe_converted - _input_range_min)));
 	}
 
-	// general logic for crop growing
 	private void Growing()
 	{
 		_currentgrowtime += Time.fixedDeltaTime;
@@ -181,7 +170,7 @@ public class PlantGrowing : UdonSharpBehaviour
 		_imgGrowingVisual.fillAmount = 0;
 		_imgResetingVisual.fillAmount = 0;
 
-		if (_autoWater == true)
+		if (_isAutoBotActive == true)
 		{
 			_meshWaterTrigger.SetActive(false);
 
@@ -197,9 +186,6 @@ public class PlantGrowing : UdonSharpBehaviour
 	{
 		// just stalling _currentgrowtime without reseting it to 0
 		_currentgrowtime = 0;
-
-		// either enabling the button to harvest, or checking if the upgrade is bought
-		// button is hidden once harvested automatically
 		
 		_meshHarvestTrigger.SetActive(true);
 		_popupReadyToHarvest.SetActive(true);
@@ -210,7 +196,7 @@ public class PlantGrowing : UdonSharpBehaviour
 		_imgGrowingVisual.fillAmount = 0;
 		_imgResetingVisual.fillAmount = 0;
 
-		if (_autoHarvest == true)
+		if (_isAutoBotActive == true)
 		{
 			HarvestPlant();
 			_meshHarvestTrigger.SetActive(false);
@@ -222,11 +208,8 @@ public class PlantGrowing : UdonSharpBehaviour
 		_btnWater.gameObject.SetActive(water);
 		_btnHarvest.gameObject.SetActive(harvest);
 	}
-	
-	// public custom events to be called by buttons
 	public void ResetPlant()
 	{
-		// "plants" a new crop
 		if (_useSeeds == true)
 		{
 			switch (_cropTag)
@@ -460,15 +443,13 @@ public class PlantGrowing : UdonSharpBehaviour
 		_cycleReseting = true;
 	}
 
-	// upgrades per local crop plot
-
 	public void UpgradeFX()
 	{
 		AudioSource _sfxSharedUIAudioSource = (AudioSource)_SceneReferences.GetProgramVariable("_sfxSharedUIAudioSource");
 		AudioClip _sfxBuy1 = (AudioClip)_SceneReferences.GetProgramVariable("_sfxBuy1");
 		_sfxSharedUIAudioSource.PlayOneShot(_sfxBuy1);
 	}
-	public void UpgradeAutoWater()
+	/*public void UpgradeAutoWater()
 	{
 		int _money = (int)_SceneReferences.GetProgramVariable("_currentMoney");
 
@@ -480,8 +461,8 @@ public class PlantGrowing : UdonSharpBehaviour
 			UpgradeFX();
 
 		}
-	}
-	public void UpgradeAutoHarvest()
+	}*/
+	/*public void UpgradeAutoHarvest()
 	{
 		int _money = (int)_SceneReferences.GetProgramVariable("_currentMoney");
 		if (_upgradeCostAutoHarvest <= _money)
@@ -491,8 +472,8 @@ public class PlantGrowing : UdonSharpBehaviour
 			_btnAutoHarvest.interactable = false;
 			UpgradeFX();
 		}
-	}
-	public void UpgradeAutoPlant()
+	}*/
+	/*public void UpgradeAutoPlant()
 	{
 		int _money = (int)_SceneReferences.GetProgramVariable("_currentMoney");
 		if (_upgradeCostAutoPlant <= _money)
@@ -502,7 +483,7 @@ public class PlantGrowing : UdonSharpBehaviour
 			_btnAutoPlant.interactable = false;
 			UpgradeFX();
 		}
-	}
+	}*/
 	public void UpgradeYield()
 	{
 		int _money = (int)_SceneReferences.GetProgramVariable("_currentMoney");
