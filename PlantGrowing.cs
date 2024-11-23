@@ -3,6 +3,7 @@ using TMPro;
 using UdonSharp;
 using UnityEngine;
 using UnityEngine.UI;
+using VRC.Udon;
 
 public class PlantGrowing : UdonSharpBehaviour
 {
@@ -333,13 +334,33 @@ public class PlantGrowing : UdonSharpBehaviour
 
 		int _CropsPlanted = (int)_SceneReferences.GetProgramVariable("_CropsPlanted");
 
-		string _currentCropType = "_current" + _cropTag;
 		string _totalCropType = "_total" + _cropTag;
-
-		int _currentCrop = (int)_SceneReferences.GetProgramVariable(_currentCropType);
+		string _currentCropType = "_current" + _cropTag;
+		string _valueCrop = "_value" + _cropTag;
 		int _totalCrop = (int)_SceneReferences.GetProgramVariable(_totalCropType);
 
-		_SceneReferences.SetProgramVariable(_currentCropType, _currentCrop + _Yield);
+		
+
+		if (_isAutoBotActive == false)
+		{
+			
+			int _currentCrop = (int)_SceneReferences.GetProgramVariable(_currentCropType);
+
+			_SceneReferences.SetProgramVariable(_currentCropType, _currentCrop + _Yield);
+		}
+		
+		if (_isAutoBotActive == true)
+		{
+			int moneyearned = _Yield * (int)_SceneReferences.GetProgramVariable(_valueCrop);
+			int money = (int)_SceneReferences.GetProgramVariable("_currentMoney");
+			money += moneyearned;
+			_SceneReferences.SetProgramVariable("_currentMoney", money);
+			UdonBehaviour _persistence = (UdonBehaviour)_SceneReferences.GetProgramVariable("_persistence");
+			_persistence.SendCustomEvent("PersistData_Save");
+		}
+		
+
+		
 		_SceneReferences.SetProgramVariable(_totalCropType, _totalCrop + _Yield);
 	}
 
@@ -493,10 +514,9 @@ public class PlantGrowing : UdonSharpBehaviour
 			if (_Yield < _maxYield)
 			{
 				_Yield += _modiferYield;
+				_SceneReferences.SetProgramVariable("_currentMoney", _money - _upgradeCostYield);
+				UpgradeFX();
 			}
-
-			_SceneReferences.SetProgramVariable("_currentMoney", _money - _upgradeCostYield);
-			UpgradeFX();
 		}
 	}
 

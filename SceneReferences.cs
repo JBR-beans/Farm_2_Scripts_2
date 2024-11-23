@@ -52,7 +52,8 @@ public class SceneReferences : UdonSharpBehaviour
 
 		_hudCropsValue.text = _valueCrops.ToString();
 	}
-
+	[Header("Persistence Configuration")]
+	public UdonBehaviour _persistence;
 	[Header("Game World")]
 	public AudioSource _sfxSharedUIAudioSource;
 	public AudioClip _sfxBuy1;

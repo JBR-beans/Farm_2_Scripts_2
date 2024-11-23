@@ -513,6 +513,9 @@ public class SellCropMenu : UdonSharpBehaviour
 
 			_amountCrop = 0;
 
+			UdonBehaviour _persistence = (UdonBehaviour)_SceneReferences.GetProgramVariable("_persistence");
+			_persistence.SendCustomEvent("PersistData_Save");
+
 			_sfxSharedUIAudioSource.PlayOneShot(_sfxBuy1);
 			_particleFX.Play();
 		}
