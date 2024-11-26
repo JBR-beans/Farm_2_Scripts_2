@@ -170,55 +170,5 @@ public class SceneReferences : UdonSharpBehaviour
 	public int _totalCrop10 = 0;
 	public int _valueCrop10 = 0;
 
-
-
-	// UNUSED
-
-
-	// global upgrades applied to all crops at once
-	/*public void UpgradeCheaperCrops()
-	{
-		if (_currentMoney >= _costUpgradeCheaperCrops && _cropCost > 0)
-		{
-			_sfxSharedUIAudioSource.PlayOneShot(_sfxBoughtItem, 0.5f);
-			_cropCost--;
-			_currentMoney -= _costUpgradeCheaperCrops;
-			_hudCheaperCropsUpgradeBought.text = "Sold!";
-		}
-	}*/
-	/*	public TextMeshProUGUI _hudCurrentCrop1Seeds;
-		public TextMeshProUGUI _hudCurrentCrop2Seeds;
-		public TextMeshProUGUI _hudCurrentCrop3Seeds;
-		public TextMeshProUGUI _hudCurrentCrop4Seeds;
-		public TextMeshProUGUI _hudCurrentCrop5Seeds;*/
-	/*	public TextMeshProUGUI _hudCostSeedsCrop1;
-		public TextMeshProUGUI _hudCostSeedsCrop2;
-		public TextMeshProUGUI _hudCostSeedsCrop3;
-		public TextMeshProUGUI _hudCostSeedsCrop4;
-		public TextMeshProUGUI _hudCostSeedsCrop5;*/
-	/*	[Header("Display crop values")]
-		public TextMeshProUGUI _hudCrop1Value;
-		public TextMeshProUGUI _hudCrop2Value;
-		public TextMeshProUGUI _hudCrop3Value;
-		public TextMeshProUGUI _hudCrop4Value;
-		public TextMeshProUGUI _hudCrop5Value;*/
-	/*
-			_hudCurrentCrop1Seeds.text = _seedCrop1.ToString();
-			_hudCurrentCrop2Seeds.text = _seedCrop2.ToString();
-			_hudCurrentCrop3Seeds.text = _seedCrop3.ToString();
-			_hudCurrentCrop4Seeds.text = _seedCrop4.ToString();
-			_hudCurrentCrop5Seeds.text = _seedCrop5.ToString();*/
-	/*_hudCrop1Value.text = (_valueCrop1 + _valueCrops).ToString();
-	_hudCrop2Value.text = (_valueCrop2 + _valueCrops).ToString();
-	_hudCrop3Value.text = (_valueCrop3 + _valueCrops).ToString();
-	_hudCrop4Value.text = (_valueCrop4 + _valueCrops).ToString();
-	_hudCrop5Value.text = (_valueCrop5 + _valueCrops).ToString();*/
-	/*
-			_hudCostSeedsCrop1.text = (_costSeedCrop1+_cropCost).ToString();
-			_hudCostSeedsCrop2.text = (_costSeedCrop2 + _cropCost).ToString();
-			_hudCostSeedsCrop3.text = (_costSeedCrop3 + _cropCost).ToString();
-			_hudCostSeedsCrop4.text = (_costSeedCrop4 + _cropCost).ToString();
-			_hudCostSeedsCrop5.text = (_costSeedCrop5 + _cropCost).ToString();*/
-	//public TextMeshProUGUI _hudCropsCost;
 }
 

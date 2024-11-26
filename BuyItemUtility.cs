@@ -8,13 +8,12 @@ using VRC.Udon;
 
 public class BuyItemUtility : UdonSharpBehaviour
 {
-    public Button _button;
-    public TextMeshProUGUI _textSold;
     public UdonBehaviour _SceneReferences;
     public bool _useInteractEvent;
 
-    
     public int _Cost;
+	public bool _setCostText;
+	public TextMeshProUGUI _textCost;
     public GameObject _Item;
     public bool _useArray;
     public GameObject[] _Items;
@@ -22,7 +21,13 @@ public class BuyItemUtility : UdonSharpBehaviour
     [Header("INTERNAL")]
     public AudioSource _sfxSharedUIAudioSource;
     public AudioClip _sfxBuy1;
-
+	public void Start()
+	{
+		if (_setCostText == true)
+		{
+			_textCost.text = _Cost.ToString();
+		}
+	}
 	public void BuyItem()
     {
         _sfxSharedUIAudioSource = (AudioSource)_SceneReferences.GetProgramVariable("_sfxSharedUIAudioSource");
@@ -38,8 +43,6 @@ public class BuyItemUtility : UdonSharpBehaviour
 					go.SetActive(true);
 				}
 				_SceneReferences.SetProgramVariable("_currentMoney", _currentMoney - _Cost);
-                _textSold.text = "Sold!";
-				_button.interactable = false;
 				_sfxSharedUIAudioSource.PlayOneShot(_sfxBuy1);
 			}
         }
@@ -51,8 +54,6 @@ public class BuyItemUtility : UdonSharpBehaviour
 			{
 				_Item.SetActive(true);
                 _SceneReferences.SetProgramVariable("_currentMoney", _currentMoney - _Cost);
-				_textSold.text = "Sold!";
-				_button.interactable = false;
 				_sfxSharedUIAudioSource.PlayOneShot(_sfxBuy1);
 			}
 		}
@@ -75,8 +76,6 @@ public class BuyItemUtility : UdonSharpBehaviour
 						go.SetActive(true);
 					}
 					_SceneReferences.SetProgramVariable("_currentMoney", _currentMoney - _Cost);
-					//_textSold.text = "Sold!";
-					//_button.interactable = false;
 					_sfxSharedUIAudioSource.PlayOneShot(_sfxBuy1);
 					this.gameObject.SetActive(false);
 				}
@@ -89,8 +88,6 @@ public class BuyItemUtility : UdonSharpBehaviour
 				{
 					_Item.SetActive(true);
 					_SceneReferences.SetProgramVariable("_currentMoney", _currentMoney - _Cost);
-					//_textSold.text = "Sold!";
-					//_button.interactable = false;
 					_sfxSharedUIAudioSource.PlayOneShot(_sfxBuy1);
 					this.gameObject.SetActive(false);
 				}

@@ -3,6 +3,8 @@ using TMPro;
 using UdonSharp;
 using UnityEngine;
 using UnityEngine.UI;
+using VRC.SDK3.Persistence;
+using VRC.SDKBase;
 using VRC.Udon;
 
 public class PlantGrowing : UdonSharpBehaviour
@@ -11,8 +13,20 @@ public class PlantGrowing : UdonSharpBehaviour
 	[Header("Modifiers")]
 	public bool _useSeeds;
 
+	[Header("INTERNAL | Persistence")]
+	public int _bufferUpgradeLevelResetTime;
+	public int _bufferUpgradeLevelYield;
+	public int _bufferCurrentCrop;
+	public bool _isFirstSessionLoad = true;
+	public string _keyUpgradeLevelResetTime;
+	public int _upgradeLevelResetTime = 1;
+	public string _keyUpgradeLevelYield;
+	public int _upgradeLevelYield = 1;
+	public string _keyCurrentCropAmount;
+	public int _currentCrop;
 
 	[Header("configure crop")]
+	public int _cropID;
 	public string _cropTag;
 	public float _maxGrowTime;
 	public float _growSpeedMultiplier;
@@ -21,15 +35,14 @@ public class PlantGrowing : UdonSharpBehaviour
 	public UdonSharpBehaviour _SceneReferences;
 
 	[Header("Configure Upgrades")]
-
-	public int _Yield;
+	public int _Yield = 1;
 	public int _modiferYield;
-	public int _maxYield;
+	public int _maxLevelYield;
 	public int _upgradeCostYield;
 
 	public float _ResetTime;
 	public float _modifierResetTime;
-	public float _minResetTime;
+	public float _maxLevelResetTime;
 	public int _upgradeCostResetTime;
 
 	public int _upgradeCostAutoPlant;
@@ -38,9 +51,6 @@ public class PlantGrowing : UdonSharpBehaviour
 
 	[Header("changed in script")]
 	public bool _isAutoBotActive;
-	//public bool _autoWater = false;
-	//public bool _autoHarvest = false;
-	//public bool _autoPlant = false;
 
 	[Header("Mesh triggers")]
 	public GameObject _meshHarvested;
@@ -57,15 +67,6 @@ public class PlantGrowing : UdonSharpBehaviour
 	public AudioClip _sfxClipPlanted;
 	public AudioClip _sfxClipWatered;
 
-	[Header("configure UI")]
-	public Button _btnPlant;
-	public Button _btnWater;
-	public Button _btnHarvest;
-	public Button _btnAutoWater;
-	public Button _btnAutoHarvest;
-	public Button _btnAutoPlant;
-	public Button _btnUpgradeYield;
-
 	[Header("Indicators")]
 	public Image _imgGrowingVisual;
 	public Image _imgResetingVisual;
@@ -79,6 +80,7 @@ public class PlantGrowing : UdonSharpBehaviour
 	private float _currentgrowtime = 0;
 	private float _ticker = 0;
 	private bool _cycleReseting;
+	
 	
 	
 	public void FixedUpdate()
@@ -154,7 +156,6 @@ public class PlantGrowing : UdonSharpBehaviour
 		_imgGrowingVisual.fillAmount = (float)ConvertFrom_Range1_Input_To_Range2_Output(0, _maxGrowTime, 0, 1, _currentgrowtime);
 		_imgResetingVisual.fillAmount = 0;
 
-		ButtonHandler(false, false, false);
 	}
 
 	
@@ -203,12 +204,7 @@ public class PlantGrowing : UdonSharpBehaviour
 			_meshHarvestTrigger.SetActive(false);
 		}
 	}
-	private void ButtonHandler(bool plant, bool water, bool harvest)
-	{
-		_btnPlant.gameObject.SetActive(plant);
-		_btnWater.gameObject.SetActive(water);
-		_btnHarvest.gameObject.SetActive(harvest);
-	}
+
 	public void ResetPlant()
 	{
 		if (_useSeeds == true)
@@ -300,7 +296,6 @@ public class PlantGrowing : UdonSharpBehaviour
 			_sfxSource.PlayOneShot(_sfxClipPlanted);
 		}
 		
-		ButtonHandler(true, false, false);
 	}
 	private void StartGrowing()
 	{
@@ -314,7 +309,6 @@ public class PlantGrowing : UdonSharpBehaviour
 		_currentgrowtime = 0.1f;
 		_growthPhase = 0;
 		_particlesDirt.Play();
-		ButtonHandler(false, false, false);
 
 		// triggers Growing() implicitely because _currentgrowtime is greater than 0
 	}
@@ -325,7 +319,14 @@ public class PlantGrowing : UdonSharpBehaviour
 
 		_currentgrowtime = 0.1f;
 
-		
+	}
+	public string GenerateCropData(string data, int cropID)
+	{
+
+		string _cropData = data + _cropID.ToString();
+
+		return _cropData;
+
 	}
 
 	public void HarvestCropType()
@@ -334,13 +335,13 @@ public class PlantGrowing : UdonSharpBehaviour
 
 		int _CropsPlanted = (int)_SceneReferences.GetProgramVariable("_CropsPlanted");
 
-		string _totalCropType = "_total" + _cropTag;
-		string _currentCropType = "_current" + _cropTag;
-		string _valueCrop = "_value" + _cropTag;
+		string _totalCropType = GenerateCropData("_totalCrop", _cropID);
+		string _currentCropType = GenerateCropData("_currentCrop", _cropID); // _currentCrop1
+		string _valueCrop = GenerateCropData("_valueCrop", _cropID);
+
 		int _totalCrop = (int)_SceneReferences.GetProgramVariable(_totalCropType);
 
 		
-
 		if (_isAutoBotActive == false)
 		{
 			
@@ -358,8 +359,6 @@ public class PlantGrowing : UdonSharpBehaviour
 			UdonBehaviour _persistence = (UdonBehaviour)_SceneReferences.GetProgramVariable("_persistence");
 			_persistence.SendCustomEvent("PersistData_Save");
 		}
-		
-
 		
 		_SceneReferences.SetProgramVariable(_totalCropType, _totalCrop + _Yield);
 	}
@@ -400,67 +399,7 @@ public class PlantGrowing : UdonSharpBehaviour
 		_popupReadyToHarvest.SetActive(false);
 
 		HarvestFx();
-
-		/*switch (_cropTag)
-		{
-			case "crop1":
-
-				int _currentCrop1 = (int)_SceneReferences.GetProgramVariable("_currentCrop1");
-				int _totalCrop1 = (int)_SceneReferences.GetProgramVariable("_totalCrop1");
-
-				// add logic for what happens with the harvested plants data
-				_SceneReferences.SetProgramVariable("_currentCrop1", _currentCrop1 + _Yield);
-				_SceneReferences.SetProgramVariable("_totalCrop1", _totalCrop1 + _Yield);
-
-				break;
-
-			case "crop2":
-
-				int _currentCrop2 = (int)_SceneReferences.GetProgramVariable("_currentCrop2");
-				int _totalCrop2 = (int)_SceneReferences.GetProgramVariable("_totalCrop2");
-
-				// add logic for what happens with the harvested plants data
-				_SceneReferences.SetProgramVariable("_currentCrop2", _currentCrop2 + _Yield);
-				_SceneReferences.SetProgramVariable("_totalCrop2", _totalCrop2 + _Yield);
-
-				break;
-
-			case "crop3":
-
-				int _currentCrop3 = (int)_SceneReferences.GetProgramVariable("_currentCrop3");
-				int _totalCrop3 = (int)_SceneReferences.GetProgramVariable("_totalCrop3");
-
-				// add logic for what happens with the harvested plants data
-				_SceneReferences.SetProgramVariable("_currentCrop3", _currentCrop3 + _Yield);
-				_SceneReferences.SetProgramVariable("_totalCrop3", _totalCrop3 + _Yield);
-
-				break;
-
-			case "crop4":
-
-				int _currentCrop4 = (int)_SceneReferences.GetProgramVariable("_currentCrop4");
-				int _totalCrop4 = (int)_SceneReferences.GetProgramVariable("_totalCrop4");
-
-				// add logic for what happens with the harvested plants data
-				_SceneReferences.SetProgramVariable("_currentCrop4", _currentCrop4 + _Yield);
-				_SceneReferences.SetProgramVariable("_totalCrop4", _totalCrop4 + _Yield);
-
-				break;
-
-			case "crop5":
-
-				int _currentCrop5 = (int)_SceneReferences.GetProgramVariable("_currentCrop5");
-				int _totalCrop5 = (int)_SceneReferences.GetProgramVariable("_totalCrop5");
-
-				// add logic for what happens with the harvested plants data
-				_SceneReferences.SetProgramVariable("_currentCrop5", _currentCrop5 + _Yield);
-				_SceneReferences.SetProgramVariable("_totalCrop5", _totalCrop5 + _Yield);
-
-
-				break;
-
-		}*/
-		
+		PersistData_CropAmount();
 		_cycleReseting = true;
 	}
 
@@ -470,51 +409,20 @@ public class PlantGrowing : UdonSharpBehaviour
 		AudioClip _sfxBuy1 = (AudioClip)_SceneReferences.GetProgramVariable("_sfxBuy1");
 		_sfxSharedUIAudioSource.PlayOneShot(_sfxBuy1);
 	}
-	/*public void UpgradeAutoWater()
-	{
-		int _money = (int)_SceneReferences.GetProgramVariable("_currentMoney");
-
-		if (_upgradeCostAutoWater <= _money)
-		{
-			_autoWater = true;
-			_SceneReferences.SetProgramVariable("_currentMoney", _money - _upgradeCostAutoWater);
-			_btnAutoWater.interactable = false;
-			UpgradeFX();
-
-		}
-	}*/
-	/*public void UpgradeAutoHarvest()
-	{
-		int _money = (int)_SceneReferences.GetProgramVariable("_currentMoney");
-		if (_upgradeCostAutoHarvest <= _money)
-		{
-			_autoHarvest = true;
-			_SceneReferences.SetProgramVariable("_currentMoney", _money - _upgradeCostAutoHarvest);
-			_btnAutoHarvest.interactable = false;
-			UpgradeFX();
-		}
-	}*/
-	/*public void UpgradeAutoPlant()
-	{
-		int _money = (int)_SceneReferences.GetProgramVariable("_currentMoney");
-		if (_upgradeCostAutoPlant <= _money)
-		{
-			_autoPlant = true;
-			_SceneReferences.SetProgramVariable("_currentMoney", _money - _upgradeCostAutoPlant);
-			_btnAutoPlant.interactable = false;
-			UpgradeFX();
-		}
-	}*/
+	
 	public void UpgradeYield()
 	{
 		int _money = (int)_SceneReferences.GetProgramVariable("_currentMoney");
 
 		if (_upgradeCostYield <= _money)
 		{
-			if (_Yield < _maxYield)
+			if (_upgradeLevelYield < _maxLevelYield)
 			{
-				_Yield += _modiferYield;
+				_upgradeLevelYield++;
+				
 				_SceneReferences.SetProgramVariable("_currentMoney", _money - _upgradeCostYield);
+				//PersistData_Save_Local();
+				_Yield = _upgradeLevelYield;
 				UpgradeFX();
 			}
 		}
@@ -525,12 +433,87 @@ public class PlantGrowing : UdonSharpBehaviour
 		int _money = (int)_SceneReferences.GetProgramVariable("_currentMoney");
 		if (_upgradeCostResetTime <= _money)
 		{
-			if (_ResetTime > _minResetTime)
+			if (_upgradeLevelResetTime < _maxLevelResetTime)
 			{
-				_ResetTime -= _modifierResetTime;
+				_upgradeLevelResetTime++;
+				
 				_SceneReferences.SetProgramVariable("_currentMoney", _money - _upgradeCostResetTime);
+				//PersistData_Save_Local();
+				_ResetTime = (_ResetTime + _cropID) - (_upgradeLevelResetTime * _modifierResetTime);
 				UpgradeFX();
+
 			}
 		}
+	}
+
+
+	public void Start()
+	{
+		// generating key name
+		_keyCurrentCropAmount = GenerateCropData("_currentCrop", _cropID);
+		_keyUpgradeLevelResetTime = GenerateCropData("_keyUpgradeLevelResetTime", _cropID);
+		_keyUpgradeLevelYield = GenerateCropData("_keyUpgradeLevelYield", _cropID);
+
+		//PersistData_Load_Local();
+
+	}
+	public override void OnPlayerDataUpdated(VRCPlayerApi player, PlayerData.Info[] infos)
+	{
+		if (player.isLocal)
+		{
+			// only update local data if its the first update from remote
+			/*if (_isFirstSessionLoad == true)
+			{
+				PersistData_Assign_Local();
+
+				_isFirstSessionLoad = false;
+			}*/
+			
+		}
+	}
+
+	public void PersistData_CropAmount()
+	{
+		_currentCrop = PlayerData.GetInt(Networking.LocalPlayer, _keyCurrentCropAmount);
+		PlayerData.SetInt(_keyCurrentCropAmount, _currentCrop + _Yield);
+
+	}
+	public void PersistData_Save_Local()
+	{
+		_currentCrop = (int)_SceneReferences.GetProgramVariable("_currentCrop");
+		
+		PlayerData.SetInt(_keyCurrentCropAmount, _currentCrop);
+		PlayerData.SetInt(_keyUpgradeLevelResetTime, _upgradeLevelResetTime);
+		PlayerData.SetInt(_keyUpgradeLevelYield, _upgradeLevelYield);
+
+	}
+	public override void OnPlayerRestored(VRCPlayerApi player)
+	{
+		if (player.isLocal == true)
+		{
+			PersistData_Load_Local();
+		}
+		
+	}
+	public void PersistData_Load_Local()
+	{
+		PersistData_Get_Local();
+		PersistData_Assign_Local();
+	}
+
+	public void PersistData_Get_Local()
+	{
+		_bufferCurrentCrop = PlayerData.GetInt(Networking.LocalPlayer, _keyCurrentCropAmount);
+		//_bufferUpgradeLevelResetTime = PlayerData.GetInt(Networking.LocalPlayer, _keyUpgradeLevelResetTime);
+		//_bufferUpgradeLevelYield = PlayerData.GetInt(Networking.LocalPlayer, _keyUpgradeLevelYield);
+	}
+
+	public void PersistData_Assign_Local()
+	{
+		//_upgradeLevelResetTime = _bufferUpgradeLevelResetTime;
+		//_upgradeLevelYield = _bufferUpgradeLevelYield;
+		_currentCrop = _bufferCurrentCrop;
+
+		_SceneReferences.SetProgramVariable(_keyCurrentCropAmount, _currentCrop);
 	}
 }
