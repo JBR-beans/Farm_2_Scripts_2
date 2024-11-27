@@ -3,6 +3,7 @@ using System;
 using TMPro;
 using UdonSharp;
 using UnityEngine;
+using VRC.SDK3.Persistence;
 using VRC.SDKBase;
 using VRC.Udon;
 
@@ -512,6 +513,12 @@ public class SellCropMenu : UdonSharpBehaviour
 			}
 
 			_amountCrop = 0;
+
+			for (int i = 1; i < 11;  i++)
+			{
+				string _key = "_currentCrop" + i.ToString();
+				PlayerData.SetInt(_key, 0);
+			}
 
 			UdonBehaviour _persistence = (UdonBehaviour)_SceneReferences.GetProgramVariable("_persistence");
 

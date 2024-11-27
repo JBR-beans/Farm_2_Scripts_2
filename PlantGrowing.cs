@@ -14,9 +14,6 @@ public class PlantGrowing : UdonSharpBehaviour
 	public bool _useSeeds;
 
 	[Header("INTERNAL | Persistence")]
-	public int _bufferUpgradeLevelResetTime;
-	public int _bufferUpgradeLevelYield;
-	public int _bufferCurrentCrop;
 	public bool _isFirstSessionLoad = true;
 	public string _keyUpgradeLevelResetTime;
 	public int _upgradeLevelResetTime = 1;
@@ -24,6 +21,7 @@ public class PlantGrowing : UdonSharpBehaviour
 	public int _upgradeLevelYield = 1;
 	public string _keyCurrentCropAmount;
 	public int _currentCrop;
+	public VRCPlayerApi _playerAPI;
 
 	[Header("configure crop")]
 	public int _cropID;
@@ -299,6 +297,7 @@ public class PlantGrowing : UdonSharpBehaviour
 	}
 	private void StartGrowing()
 	{
+
 		_meshPlanted.SetActive(true);
 		_meshHarvested.SetActive(false);
 		_popupOutOfSeeds.SetActive(false);
@@ -331,6 +330,7 @@ public class PlantGrowing : UdonSharpBehaviour
 
 	public void HarvestCropType()
 	{
+
 		_cropRoot.transform.localScale = new Vector3(0.1f, 0.1f, 0.1f);
 
 		int _CropsPlanted = (int)_SceneReferences.GetProgramVariable("_CropsPlanted");
@@ -399,7 +399,7 @@ public class PlantGrowing : UdonSharpBehaviour
 		_popupReadyToHarvest.SetActive(false);
 
 		HarvestFx();
-		PersistData_CropAmount();
+		PersistData_Save();
 		_cycleReseting = true;
 	}
 
@@ -418,10 +418,14 @@ public class PlantGrowing : UdonSharpBehaviour
 		{
 			if (_upgradeLevelYield < _maxLevelYield)
 			{
+				_upgradeLevelYield = PlayerData.GetInt(Networking.LocalPlayer, _keyUpgradeLevelYield);
 				_upgradeLevelYield++;
-				
+				PlayerData.SetInt(_keyUpgradeLevelYield, _upgradeLevelYield);
+
 				_SceneReferences.SetProgramVariable("_currentMoney", _money - _upgradeCostYield);
-				//PersistData_Save_Local();
+				UdonBehaviour _p = (UdonBehaviour)_SceneReferences.GetProgramVariable("_persistence");
+				_p.SendCustomEvent("PersistData_Save");
+				
 				_Yield = _upgradeLevelYield;
 				UpgradeFX();
 			}
@@ -435,85 +439,98 @@ public class PlantGrowing : UdonSharpBehaviour
 		{
 			if (_upgradeLevelResetTime < _maxLevelResetTime)
 			{
+				_upgradeLevelResetTime = PlayerData.GetInt(Networking.LocalPlayer, _keyUpgradeLevelResetTime);
 				_upgradeLevelResetTime++;
-				
+				PlayerData.SetInt(_keyUpgradeLevelResetTime, _upgradeLevelResetTime);
+
 				_SceneReferences.SetProgramVariable("_currentMoney", _money - _upgradeCostResetTime);
-				//PersistData_Save_Local();
-				_ResetTime = (_ResetTime + _cropID) - (_upgradeLevelResetTime * _modifierResetTime);
+				UdonBehaviour _p = (UdonBehaviour)_SceneReferences.GetProgramVariable("_persistence");
+				_p.SendCustomEvent("PersistData_Save");
+
+				float _upgradeMod = _upgradeLevelResetTime * _modifierResetTime;
+				float resettime = _ResetTime + _cropID;
+
+				_ResetTime = resettime - _upgradeMod;
+
 				UpgradeFX();
 
 			}
 		}
 	}
 
-
+	public string _debugText;
 	public void Start()
 	{
-		// generating key name
-		_keyCurrentCropAmount = GenerateCropData("_currentCrop", _cropID);
-		_keyUpgradeLevelResetTime = GenerateCropData("_keyUpgradeLevelResetTime", _cropID);
-		_keyUpgradeLevelYield = GenerateCropData("_keyUpgradeLevelYield", _cropID);
+		_playerAPI = Networking.LocalPlayer;
 
-		//PersistData_Load_Local();
+		GenerateKeys();
 
+		PersistData_Load();
 	}
-	public override void OnPlayerDataUpdated(VRCPlayerApi player, PlayerData.Info[] infos)
-	{
-		if (player.isLocal)
-		{
-			// only update local data if its the first update from remote
-			/*if (_isFirstSessionLoad == true)
-			{
-				PersistData_Assign_Local();
 
-				_isFirstSessionLoad = false;
-			}*/
+	public void GenerateKeys()
+	{
+		_keyCurrentCropAmount = GenerateCropData("_currentCrop", _cropID);
+		_keyUpgradeLevelResetTime = GenerateCropData("_upgradeLevelResetTime", _cropID);
+		_keyUpgradeLevelYield = GenerateCropData("_upgradeLevelYield", _cropID);
+	}
+
+	public void PersistData_Save()
+	{
+		if (_playerAPI.isLocal)
+		{
+
+			int _currentCrop = (int)_SceneReferences.GetProgramVariable(_keyCurrentCropAmount);
+
+			PlayerData.SetInt(_keyCurrentCropAmount, _currentCrop);
+			PlayerData.SetInt(_keyUpgradeLevelResetTime, _upgradeLevelResetTime);
+			PlayerData.SetInt(_keyUpgradeLevelYield, _upgradeLevelYield);
 			
 		}
 	}
 
-	public void PersistData_CropAmount()
+	public void PersistData_Load()
 	{
-		_currentCrop = PlayerData.GetInt(Networking.LocalPlayer, _keyCurrentCropAmount);
-		PlayerData.SetInt(_keyCurrentCropAmount, _currentCrop + _Yield);
-
-	}
-	public void PersistData_Save_Local()
-	{
-		_currentCrop = (int)_SceneReferences.GetProgramVariable("_currentCrop");
-		
-		PlayerData.SetInt(_keyCurrentCropAmount, _currentCrop);
-		PlayerData.SetInt(_keyUpgradeLevelResetTime, _upgradeLevelResetTime);
-		PlayerData.SetInt(_keyUpgradeLevelYield, _upgradeLevelYield);
-
-	}
-	public override void OnPlayerRestored(VRCPlayerApi player)
-	{
-		if (player.isLocal == true)
+		if (_playerAPI.isLocal)
 		{
-			PersistData_Load_Local();
+
+			var currentCrop = PlayerData.GetInt(Networking.LocalPlayer, _keyCurrentCropAmount);
+			int _currentCrop = currentCrop;
+			_SceneReferences.SetProgramVariable(_keyCurrentCropAmount, _currentCrop);
+
+			// if that didnt work, take the math out of here and let it just be in the functions ^^^
+
+			var _bufferUpgradeLevelResetTime = PlayerData.GetInt(Networking.LocalPlayer, _keyUpgradeLevelResetTime);
+			if ( _bufferUpgradeLevelResetTime > 0 )
+			{
+				_upgradeLevelResetTime = _bufferUpgradeLevelResetTime;
+
+				/*float _upgradeMod = _upgradeLevelResetTime * _modifierResetTime;
+				float resettime = _ResetTime + _cropID;
+
+				_ResetTime = resettime - _upgradeMod;*/
+			}
+
+			
+
+			var _bufferUpgradeLevelYield = PlayerData.GetInt(Networking.LocalPlayer, _keyUpgradeLevelYield);
+			if (_bufferUpgradeLevelYield > 0 )
+			{
+				_upgradeLevelYield = _bufferUpgradeLevelYield;
+				/*_Yield = _upgradeLevelYield;*/
+			}
 		}
-		
-	}
-	public void PersistData_Load_Local()
-	{
-		PersistData_Get_Local();
-		PersistData_Assign_Local();
 	}
 
-	public void PersistData_Get_Local()
+	public override void OnPlayerDataUpdated(VRCPlayerApi player, PlayerData.Info[] infos)
 	{
-		_bufferCurrentCrop = PlayerData.GetInt(Networking.LocalPlayer, _keyCurrentCropAmount);
-		//_bufferUpgradeLevelResetTime = PlayerData.GetInt(Networking.LocalPlayer, _keyUpgradeLevelResetTime);
-		//_bufferUpgradeLevelYield = PlayerData.GetInt(Networking.LocalPlayer, _keyUpgradeLevelYield);
+		if (player.isLocal)
+		{
+			PersistData_Load();
+
+			_playerAPI = player;
+		} 
 	}
 
-	public void PersistData_Assign_Local()
-	{
-		//_upgradeLevelResetTime = _bufferUpgradeLevelResetTime;
-		//_upgradeLevelYield = _bufferUpgradeLevelYield;
-		_currentCrop = _bufferCurrentCrop;
 
-		_SceneReferences.SetProgramVariable(_keyCurrentCropAmount, _currentCrop);
-	}
 }

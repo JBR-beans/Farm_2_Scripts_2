@@ -22,8 +22,8 @@ public class SceneReferences : UdonSharpBehaviour
 		_hudCurrentCrop8.text = _currentCrop8.ToString();
 		_hudCurrentCrop9.text = _currentCrop9.ToString();
 		_hudCurrentCrop10.text = _currentCrop10.ToString();
-
-
+		
+		_debug.text = _debugText;
 
 
 	}
@@ -60,6 +60,8 @@ public class SceneReferences : UdonSharpBehaviour
 	public AudioClip _sfxBoughtItem;
 	public TextMeshProUGUI _hudCheaperCropsUpgradeBought;
 	public int _totalAutoBot = 0;
+	public TextMeshProUGUI _debug;
+	public string _debugText;
 
 	[Header("HUD")]
 	[Header("Display current crop amounts")]
