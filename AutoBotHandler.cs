@@ -9,9 +9,11 @@ public class AutoBotHandler : UdonSharpBehaviour
 {
     public UdonBehaviour _SceneReferences;
     public UdonBehaviour _CropPlotReferences;
+	public UdonBehaviour _CropPlotBuyButtonReference;
 	public UdonBehaviour _EventCaller;
     public GameObject _AutoBot;
     private int _autobotcount;
+	private int _maxautobot;
 
     public bool _isAutoBotAssigned;
 
@@ -23,20 +25,23 @@ public class AutoBotHandler : UdonSharpBehaviour
     public void CheckAutobotCount()
     {
         int count = (int)_SceneReferences.GetProgramVariable("_totalAutoBot");
-        _autobotcount = count;
+		int max = (int)_SceneReferences.GetProgramVariable("_maxAutoBot");
+		_maxautobot = max;
+		_autobotcount = count;
 	}
 
     public void ToggleEditMode()
     {
 
 		CheckAutobotCount();
-
-		if (_isAutoBotAssigned == true)
+		// dont display edit mode buttons for crop plots not yet bought, referenced from the buy button script
+		bool isbought = (bool)_CropPlotBuyButtonReference.GetProgramVariable("_isBought");
+		if (_isAutoBotAssigned == true && isbought == true)
 		{
 			_btnDismiss.SetActive(!_btnDismiss.activeSelf);
 			_btnAssign.SetActive(false);
 		}
-		else if (_isAutoBotAssigned == false) 
+		else if (_isAutoBotAssigned == false && isbought == true) 
 		{
 			_btnAssign.SetActive(!_btnAssign.activeSelf);
 			_btnDismiss.SetActive(false);
@@ -52,7 +57,7 @@ public class AutoBotHandler : UdonSharpBehaviour
     public void AssignAutoBot()
     {
 		CheckAutobotCount();
-		if (_autobotcount < 3)
+		if (_autobotcount < _maxautobot)
 		{
 			_btnAssign.SetActive(false);
 			_supplyDropCrate.SetActive(true);

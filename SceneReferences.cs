@@ -60,6 +60,7 @@ public class SceneReferences : UdonSharpBehaviour
 	public AudioClip _sfxBoughtItem;
 	public TextMeshProUGUI _hudCheaperCropsUpgradeBought;
 	public int _totalAutoBot = 0;
+	public int _maxAutoBot;
 	public TextMeshProUGUI _debug;
 	public string _debugText;
 

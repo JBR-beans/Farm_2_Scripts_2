@@ -24,6 +24,10 @@ public class PlantGrowing : UdonSharpBehaviour
 	public VRCPlayerApi _playerAPI;
 
 	[Header("configure crop")]
+	public Mesh _cropMesh;
+	public MeshFilter _cropMeshFilter;
+	// _particlesCrop
+	
 	public int _cropID;
 	public string _cropTag;
 	public float _maxGrowTime;
@@ -175,7 +179,6 @@ public class PlantGrowing : UdonSharpBehaviour
 			_meshWaterTrigger.SetActive(false);
 
 			_sfxSource.PlayOneShot(_sfxClipWatered);
-			_particleWater.Play();
 
 			WaterPlant();
 		}
@@ -315,7 +318,7 @@ public class PlantGrowing : UdonSharpBehaviour
 	{
 		_popupNeedsWater.SetActive(false);
 		_meshWaterTrigger.SetActive(false);
-
+		_particleWater.Play();
 		_currentgrowtime = 0.1f;
 
 	}
@@ -466,6 +469,14 @@ public class PlantGrowing : UdonSharpBehaviour
 		GenerateKeys();
 
 		PersistData_Load();
+		GenerateCropMesh();
+
+	}
+
+	public void GenerateCropMesh()
+	{
+		_cropMeshFilter.mesh = _cropMesh;
+		_particlesCrop.GetComponent<ParticleSystemRenderer>().mesh = _cropMesh;
 	}
 
 	public void GenerateKeys()
