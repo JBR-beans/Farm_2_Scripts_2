@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using TMPro;
 using UdonSharp;
 using UnityEngine;
@@ -76,6 +77,9 @@ public class PlantGrowing : UdonSharpBehaviour
 	public GameObject _popupOutOfSeeds;
 	public GameObject _popupNeedsWater;
 	public GameObject _popupReadyToHarvest;
+
+	[Header("debug")]
+	public TextMeshProUGUI _debug;
 
 	[Header("INTERNAL")]
 	public int _growthPhase = 0;
@@ -451,10 +455,9 @@ public class PlantGrowing : UdonSharpBehaviour
 				_p.SendCustomEvent("PersistData_Save");
 
 				float _upgradeMod = _upgradeLevelResetTime * _modifierResetTime;
-				float resettime = _ResetTime + _cropID;
 
-				_ResetTime = resettime - _upgradeMod;
-
+				_ResetTime = _ResetTime - _upgradeMod;
+				_debug.text = _ResetTime.ToString();
 				UpgradeFX();
 
 			}
@@ -465,7 +468,7 @@ public class PlantGrowing : UdonSharpBehaviour
 	public void Start()
 	{
 		_playerAPI = Networking.LocalPlayer;
-
+		_ResetTime += _cropID;
 		GenerateKeys();
 
 		PersistData_Load();
