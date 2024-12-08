@@ -64,7 +64,19 @@ public class SceneReferences : UdonSharpBehaviour
 	public TextMeshProUGUI _debug;
 	public string _debugText;
 
+	public void Start()
+	{
+		for(int i = 1; i < _cropMeshFilters.Length; i++)
+		{
+			_cropMeshFilters[i].mesh = _cropMeshes[i];
+		}
+	}
+
 	[Header("HUD")]
+	[Header("Crop mesh visuals for crop amount")]
+	[Header("Leave index 0 blank, 1 based array")]
+	public MeshFilter[] _cropMeshFilters;
+
 	[Header("Display current crop amounts")]
 	public TextMeshProUGUI _hudCurrentCrop1;
 	public TextMeshProUGUI _hudCurrentCrop2;
@@ -112,7 +124,9 @@ public class SceneReferences : UdonSharpBehaviour
 	[Header("Unlockables")]
 	public bool _unlockedAutoBot = false;
 
-	[Header("Crop references")]
+	[Header("Crop references and data")]
+	[Header("Leave index 0 blank, 1 based array")]
+	public Mesh[] _cropMeshes;
 	[Header("crop1")]
 	public string _tagCrop1 = "crop1";
 	public int _currentCrop1 = 0;

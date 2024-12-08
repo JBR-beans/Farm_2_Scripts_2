@@ -63,7 +63,7 @@ public class PlantGrowing : UdonSharpBehaviour
 
 	[Header("configure VFX/SFX")]
 	public ParticleSystem _particlesDirt;
-	public ParticleSystem _particlesCrop;
+	public ParticleSystem[] _particlesCrop;
 	public ParticleSystem _particleWater;
 	public AudioSource _sfxSource;
 	public AudioClip _sfxClipHarvest;
@@ -78,8 +78,12 @@ public class PlantGrowing : UdonSharpBehaviour
 	public GameObject _popupNeedsWater;
 	public GameObject _popupReadyToHarvest;
 
-	[Header("debug")]
-	public TextMeshProUGUI _debug;
+	[Header("Upgrade Text View")]
+	public TextMeshProUGUI _txtResetTime;
+
+	[Header("debug views")]
+	public TextMeshProUGUI _debugView1;
+	//public TextMeshProUGUI _debugView2;
 
 	[Header("INTERNAL")]
 	public int _growthPhase = 0;
@@ -212,7 +216,7 @@ public class PlantGrowing : UdonSharpBehaviour
 
 	public void ResetPlant()
 	{
-		if (_useSeeds == true)
+		/*if (_useSeeds == true)
 		{
 			switch (_cropTag)
 			{
@@ -294,8 +298,8 @@ public class PlantGrowing : UdonSharpBehaviour
 					break;
 
 			}
-		}
-		else
+		}*/
+		if (_useSeeds == false)
 		{
 			StartGrowing();
 			_sfxSource.PlayOneShot(_sfxClipPlanted);
@@ -338,7 +342,7 @@ public class PlantGrowing : UdonSharpBehaviour
 	public void HarvestCropType()
 	{
 
-		_cropRoot.transform.localScale = new Vector3(0.1f, 0.1f, 0.1f);
+		
 
 		int _CropsPlanted = (int)_SceneReferences.GetProgramVariable("_CropsPlanted");
 
@@ -370,13 +374,38 @@ public class PlantGrowing : UdonSharpBehaviour
 		_SceneReferences.SetProgramVariable(_totalCropType, _totalCrop + _Yield);
 	}
 
+	public void CollectCrop()
+	{
+		var c = _particlesCrop[1].collision;
+		//c.enabled = false;
+		//int _CropsPlanted = (int)_SceneReferences.GetProgramVariable("_CropsPlanted");
+
+		//string _totalCropType = GenerateCropData("_totalCrop", _cropID);
+		string _currentCropType = GenerateCropData("_currentCrop", _cropID); // _currentCrop1
+		//string _valueCrop = GenerateCropData("_valueCrop", _cropID);
+
+		//int _totalCrop = (int)_SceneReferences.GetProgramVariable(_totalCropType);
+
+
+		int _currentCrop = (int)_SceneReferences.GetProgramVariable(_currentCropType);
+
+		_SceneReferences.SetProgramVariable(_currentCropType, _currentCrop + 1);
+		if (_debugView1.text.Length > 200)
+		{
+			_debugView1.text = "";
+		}
+		_debugView1.text += '\n' + "Item Collected" + _cropTag;
+
+		//c.enabled = true;
+	}
+
 	public void HarvestFx()
 	{
 		_sfxSource.PlayOneShot(_sfxClipHarvest);
 
-		var emission = _particlesCrop.emission;
+		var emission = _particlesCrop[0].emission;
 
-		if (_Yield < 15)
+		if (_Yield < _maxLevelYield)
 		{
 			emission.SetBursts(
 		new ParticleSystem.Burst[]
@@ -386,9 +415,9 @@ public class PlantGrowing : UdonSharpBehaviour
 		}
 
 
-		if (_Yield >= 15)
+		if (_Yield >= _maxLevelYield)
 		{
-			Single s = 15;
+			Single s = _maxLevelYield;
 			emission.SetBursts(
 		new ParticleSystem.Burst[]
 		{
@@ -396,16 +425,26 @@ public class PlantGrowing : UdonSharpBehaviour
 		});
 		}
 
-		_particlesCrop.Play();
+
+		_particlesCrop[0].Play();
+
 	}
 	public void HarvestPlant()
 	{
-		HarvestCropType();
+		// check if particle system is at max
+		// if it is, disallow harvesting
+		// first run FX which sends particles out to collect
+		// collection triggers incrementing crop amount
+
+		//HarvestCropType();
 
 		_meshHarvestTrigger.SetActive(false);
 		_popupReadyToHarvest.SetActive(false);
-
-		HarvestFx();
+		if (_isAutoBotActive == false)
+		{
+			HarvestFx();
+		}
+		_cropRoot.transform.localScale = new Vector3(0.1f, 0.1f, 0.1f);
 		PersistData_Save();
 		_cycleReseting = true;
 	}
@@ -457,7 +496,7 @@ public class PlantGrowing : UdonSharpBehaviour
 				float _upgradeMod = _upgradeLevelResetTime * _modifierResetTime;
 
 				_ResetTime = _ResetTime - _upgradeMod;
-				_debug.text = _ResetTime.ToString();
+				_txtResetTime.text = _ResetTime.ToString();
 				UpgradeFX();
 
 			}
@@ -478,8 +517,18 @@ public class PlantGrowing : UdonSharpBehaviour
 
 	public void GenerateCropMesh()
 	{
+		var tmp = (Mesh[])_SceneReferences.GetProgramVariable("_cropMeshes");
+		int l = tmp.Length;
+		Mesh[] meshes = new Mesh[l];
+		meshes = (Mesh[])_SceneReferences.GetProgramVariable("_cropMeshes");
+		_cropMesh = meshes[_cropID];
 		_cropMeshFilter.mesh = _cropMesh;
-		_particlesCrop.GetComponent<ParticleSystemRenderer>().mesh = _cropMesh;
+
+		foreach (ParticleSystem p in _particlesCrop)
+		{
+			p.GetComponent<ParticleSystemRenderer>().mesh = _cropMesh;
+		}
+		
 	}
 
 	public void GenerateKeys()
@@ -511,7 +560,7 @@ public class PlantGrowing : UdonSharpBehaviour
 			var currentCrop = PlayerData.GetInt(Networking.LocalPlayer, _keyCurrentCropAmount);
 			int _currentCrop = currentCrop;
 			_SceneReferences.SetProgramVariable(_keyCurrentCropAmount, _currentCrop);
-
+			_txtResetTime.text = _ResetTime.ToString();
 			// if that didnt work, take the math out of here and let it just be in the functions ^^^
 
 			var _bufferUpgradeLevelResetTime = PlayerData.GetInt(Networking.LocalPlayer, _keyUpgradeLevelResetTime);
