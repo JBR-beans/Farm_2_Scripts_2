@@ -1,11 +1,17 @@
 ﻿
+using System;
 using UdonSharp;
 using UnityEngine;
+using UnityEngine.Android;
 using VRC.SDKBase;
 using VRC.Udon;
 
 public class SupplyDropHitGround : UdonSharpBehaviour
 {
+	public bool _useParticleBurst;
+	public ParticleSystem _burstParticles;
+	public Single _burstMax;
+	public bool _useItem;
 	public GameObject _Item;
 
 	public bool _additionalItemEnabled;
@@ -26,7 +32,10 @@ public class SupplyDropHitGround : UdonSharpBehaviour
 		_PS1.transform.transform.position = transform.position;
 		_PS2.transform.transform.position = transform.position;
 
-		_Item.SetActive(true);
+		if (_useItem == true)
+		{
+			_Item.SetActive(true);
+		}
 
 		_PS1.SetActive(true);
 		_PS2.SetActive(true);
@@ -46,6 +55,19 @@ public class SupplyDropHitGround : UdonSharpBehaviour
 
 		_sfxCrate.PlayOneShot(_sfxClip);
 
+		if (_useParticleBurst == true)
+		{
+			var emission = _burstParticles.emission;
+
+			emission.SetBursts(
+			new ParticleSystem.Burst[]
+				{
+					new ParticleSystem.Burst(0.0f, _burstMax)
+				}
+			);
+
+			_burstParticles.Play();
+		}
 		this.gameObject.SetActive(false);
 	}
 }

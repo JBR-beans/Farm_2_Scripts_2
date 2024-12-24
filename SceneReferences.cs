@@ -9,6 +9,87 @@ public class SceneReferences : UdonSharpBehaviour
 {
 	// fields with "total" count lifetime, for example as achievement or to unlock things
 	// duplicate crop to make more different plants
+	public UdonBehaviour _SelfReference;
+	[Header("Quests")]
+	public bool _isQuesting;
+	public GameObject _questSupplyDrop;
+	public string _cropTag;
+	private string _cropData;
+	public string[] _cropNames;
+	public int _cropIDs;
+	private int _ranID;
+	public TextMeshProUGUI _hudCurrentQuestProgress;
+	public int _questMinAmount;
+	public int _questMaxAmount;
+	public int _questCurrentAmount;
+	public int _questCurrentNeededAmount;
+	public int _moneyBonus;
+	public int _questsCompleted;
+
+	public string GenerateCropData(string data, int cropID)
+	{
+
+		string _cropData = data + cropID.ToString();
+
+		return _cropData;
+
+	}
+
+	public void RerollQuest()
+	{
+		// possibly cost money, otherwise just a reroll button
+		QuestStarted();
+	}
+	public void QuestStarted()
+	{
+		
+		_questCurrentNeededAmount = Random.Range(_questMinAmount, _questMaxAmount);
+
+		int ran = Random.Range(1, _cropNames.Length);
+		for(int i = 1; i < _cropNames.Length; i++)
+		{
+			if (i == ran)
+			{
+				_ranID = i;
+				_cropTag = _cropNames[i];
+			}
+		}
+
+		_cropData = GenerateCropData("_currentCrop", _ranID);
+		_isQuesting = true;
+	}
+	public void UpdateQuestProgress()
+	{
+		if (_isQuesting == true)
+		{
+			_questCurrentAmount = (int)_SelfReference.GetProgramVariable(_cropData);
+
+			_hudCurrentQuestProgress.text = "Collect " + _questCurrentNeededAmount.ToString() + " " + _cropTag;
+			_hudCurrentQuestProgress.text += "\n";
+			_hudCurrentQuestProgress.text += "Collected: " + _questCurrentAmount.ToString();
+
+			if (_questCurrentAmount >= _questCurrentNeededAmount)
+			{
+				QuestCompleted();
+			}
+		}
+		
+		//_hudCurrentQuestProgress.text = ;
+	}
+	public void QuestCompleted()
+	{
+		// do logic
+		_questSupplyDrop.SetActive(true);
+		_questsCompleted++;
+		_currentMoney += _moneyBonus;
+		_isQuesting = false;
+		// start new random ambient quest
+
+		// NEEDS USER INPUT
+		// if user has lots of crops, quest randomizer will constantly award money 
+		// need user input to start new quest, cannot be automatic without some kind of cooldown or check
+		// QuestStarted();
+	}
 
 	public void HUDSetCurrentCropTotals()
 	{
@@ -24,6 +105,8 @@ public class SceneReferences : UdonSharpBehaviour
 		_hudCurrentCrop10.text = _currentCrop10.ToString();
 		
 		_debug.text = _debugText;
+
+
 
 
 	}
@@ -43,7 +126,7 @@ public class SceneReferences : UdonSharpBehaviour
 	}
 	public void Update()
 	{
-
+		UpdateQuestProgress();
 		HUDSetCurrentCropTotals();
 
 		_hudCurrentMoney.text = _currentMoney.ToString();
@@ -70,12 +153,15 @@ public class SceneReferences : UdonSharpBehaviour
 		{
 			_cropMeshFilters[i].mesh = _cropMeshes[i];
 		}
+		QuestStarted();
 	}
 
 	[Header("HUD")]
 	[Header("Crop mesh visuals for crop amount")]
 	[Header("Leave index 0 blank, 1 based array")]
 	public MeshFilter[] _cropMeshFilters;
+
+	
 
 	[Header("Display current crop amounts")]
 	public TextMeshProUGUI _hudCurrentCrop1;

@@ -69,6 +69,7 @@ public class PlantGrowing : UdonSharpBehaviour
 	public AudioClip _sfxClipHarvest;
 	public AudioClip _sfxClipPlanted;
 	public AudioClip _sfxClipWatered;
+	public AudioClip _sfxClipCollect;
 
 	[Header("Indicators")]
 	public Image _imgGrowingVisual;
@@ -376,7 +377,7 @@ public class PlantGrowing : UdonSharpBehaviour
 
 	public void CollectCrop()
 	{
-		var c = _particlesCrop[1].collision;
+		//var c = _particlesCrop[1].collision;
 		//c.enabled = false;
 		//int _CropsPlanted = (int)_SceneReferences.GetProgramVariable("_CropsPlanted");
 
@@ -395,10 +396,31 @@ public class PlantGrowing : UdonSharpBehaviour
 			_debugView1.text = "";
 		}
 		_debugView1.text += '\n' + "Item Collected" + _cropTag;
-
+		_sfxSource.PlayOneShot(_sfxClipCollect);
 		//c.enabled = true;
 	}
+	public void HarvestAutobot()
+	{
+		_sfxSource.PlayOneShot(_sfxClipHarvest);
+		string _currentCropType = GenerateCropData("_currentCrop", _cropID); // _currentCrop1
+		int _currentCrop = (int)_SceneReferences.GetProgramVariable(_currentCropType);
+		_SceneReferences.SetProgramVariable(_currentCropType, _currentCrop + _Yield);
+		AutoSell();
 
+	}
+	public void AutoSell()
+	{
+		string _currentCropType = GenerateCropData("_currentCrop", _cropID);
+		string _valueCropType = GenerateCropData("_valueCrop",  _cropID);
+
+		int current = (int)_SceneReferences.GetProgramVariable(_currentCropType);
+		int value = (int)_SceneReferences.GetProgramVariable(_valueCropType);
+
+		int earned = current + value;
+
+		_SceneReferences.SetProgramVariable("_currentMoney", (int)_SceneReferences.GetProgramVariable("_currentMoney") + earned);
+
+	}
 	public void HarvestFx()
 	{
 		_sfxSource.PlayOneShot(_sfxClipHarvest);
@@ -443,6 +465,10 @@ public class PlantGrowing : UdonSharpBehaviour
 		if (_isAutoBotActive == false)
 		{
 			HarvestFx();
+		}
+		if (_isAutoBotActive == true)
+		{
+			HarvestAutobot();
 		}
 		_cropRoot.transform.localScale = new Vector3(0.1f, 0.1f, 0.1f);
 		PersistData_Save();
@@ -561,7 +587,6 @@ public class PlantGrowing : UdonSharpBehaviour
 			int _currentCrop = currentCrop;
 			_SceneReferences.SetProgramVariable(_keyCurrentCropAmount, _currentCrop);
 			_txtResetTime.text = _ResetTime.ToString();
-			// if that didnt work, take the math out of here and let it just be in the functions ^^^
 
 			var _bufferUpgradeLevelResetTime = PlayerData.GetInt(Networking.LocalPlayer, _keyUpgradeLevelResetTime);
 			if ( _bufferUpgradeLevelResetTime > 0 )
