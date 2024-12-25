@@ -1,4 +1,5 @@
 ﻿
+using JetBrains.Annotations;
 using System;
 using TMPro;
 using UdonSharp;
@@ -13,15 +14,7 @@ public class SellCropMenu : UdonSharpBehaviour
 	public ParticleSystem _particleFX;
     public UdonBehaviour _SceneReferences;
 
-    private int _amountCrop;
-	/*
-		public TextMeshProUGUI _viewCropAmount;
-
-			public AudioClip _sfxUISoundIncreaseAmount;
-			public AudioClip _sfxUISoundDecreaseAmount;
-			public AudioClip _sfxUISoundSell;
-			public float _sfxUIvolume;*/
-
+    private int total;
 	public AudioSource _sfxSharedUIAudioSource;
 	public AudioClip _sfxBuy1;
 
@@ -373,159 +366,221 @@ public class SellCropMenu : UdonSharpBehaviour
 			_amountCrop = 0;
 			_viewCropAmount.text = "0";
 		}*/
+
 	public void SellAll()
+	{
+
+		int money = (int)_SceneReferences.GetProgramVariable("_currentMoney");
+		int[] current = (int[])_SceneReferences.GetProgramVariable("_currentCrops");
+		int[] value = (int[])_SceneReferences.GetProgramVariable("_valueCrops");
+		int[] calculated = new int[current.Length];
+
+		for (int i = 0; i < current.Length; i++)
+		{
+			calculated[i] = current[i] * value[i];
+		}
+
+		foreach (int i in calculated)
+		{
+			total += i;
+		}
+
+		_SceneReferences.SetProgramVariable("_currentMoney", money + total);
+
+		for(int i = 0; i < current.Length; i++)
+		{
+			current[i] = 0;
+		}
+		SellFX();
+
+		_SceneReferences.SetProgramVariable("_currentCrops", current);
+		total = 0;
+
+		
+
+	}
+	public void SellFX()
 	{
 		_sfxSharedUIAudioSource = (AudioSource)_SceneReferences.GetProgramVariable("_sfxSharedUIAudioSource");
 		_sfxBuy1 = (AudioClip)_SceneReferences.GetProgramVariable("_sfxBuy1");
 
-		int _currentCrop1 = (int)_SceneReferences.GetProgramVariable("_currentCrop1");
-		int _currentCrop2 = (int)_SceneReferences.GetProgramVariable("_currentCrop2");
-		int _currentCrop3 = (int)_SceneReferences.GetProgramVariable("_currentCrop3");
-		int _currentCrop4 = (int)_SceneReferences.GetProgramVariable("_currentCrop4");
-		int _currentCrop5 = (int)_SceneReferences.GetProgramVariable("_currentCrop5");
-		int _currentCrop6 = (int)_SceneReferences.GetProgramVariable("_currentCrop6");
-		int _currentCrop7 = (int)_SceneReferences.GetProgramVariable("_currentCrop7");
-		int _currentCrop8 = (int)_SceneReferences.GetProgramVariable("_currentCrop8");
-		int _currentCrop9 = (int)_SceneReferences.GetProgramVariable("_currentCrop9");
-		int _currentCrop10 = (int)_SceneReferences.GetProgramVariable("_currentCrop10");
-
-
-		_amountCrop =
-			_currentCrop1
-			+ _currentCrop2
-			+ _currentCrop3
-			+ _currentCrop4
-			+ _currentCrop5
-			+ _currentCrop6
-			+ _currentCrop7
-			+ _currentCrop8
-			+ _currentCrop9
-			+ _currentCrop10;
-
-		if (_amountCrop > 0)
+		var emission = _particleFX.emission;
+		if (total < 100)
 		{
-			int _currentMoney = (int)_SceneReferences.GetProgramVariable("_currentMoney");
-			int _totalMoney = (int)_SceneReferences.GetProgramVariable("_totalMoney");
-
-			int _valueCrops = (int)_SceneReferences.GetProgramVariable("_valueCrops");
-
-			int _valueCrop1 = (int)_SceneReferences.GetProgramVariable("_valueCrop1");
-			_valueCrop1 += _valueCrops;
-			_valueCrop1 *= _currentCrop1;
-
-			int _valueCrop2 = (int)_SceneReferences.GetProgramVariable("_valueCrop2");
-			_valueCrop2 += _valueCrops;
-			_valueCrop2 *= _currentCrop2;
-
-			int _valueCrop3 = (int)_SceneReferences.GetProgramVariable("_valueCrop3");
-			_valueCrop3 += _valueCrops;
-			_valueCrop3 *= _currentCrop3;
-
-			int _valueCrop4 = (int)_SceneReferences.GetProgramVariable("_valueCrop4");
-			_valueCrop4 += _valueCrops;
-			_valueCrop4 *= _currentCrop4;
-
-			int _valueCrop5 = (int)_SceneReferences.GetProgramVariable("_valueCrop5");
-			_valueCrop5 += _valueCrops;
-			_valueCrop5 *= _currentCrop5;
-
-			int _valueCrop6 = (int)_SceneReferences.GetProgramVariable("_valueCrop6");
-			_valueCrop6 += _valueCrops;
-			_valueCrop6 *= _currentCrop6;
-
-			int _valueCrop7 = (int)_SceneReferences.GetProgramVariable("_valueCrop7");
-			_valueCrop7 += _valueCrops;
-			_valueCrop7 *= _currentCrop7;
-
-			int _valueCrop8 = (int)_SceneReferences.GetProgramVariable("_valueCrop8");
-			_valueCrop8 += _valueCrops;
-			_valueCrop8 *= _currentCrop8;
-
-			int _valueCrop9 = (int)_SceneReferences.GetProgramVariable("_valueCrop9");
-			_valueCrop9 += _valueCrops;
-			_valueCrop9 *= _currentCrop9;
-
-			int _valueCrop10 = (int)_SceneReferences.GetProgramVariable("_valueCrop10");
-			_valueCrop10 += _valueCrops;
-			_valueCrop10 *= _currentCrop10;
-
-			int _totalvalue = 0;
-
-			_totalvalue +=
-				_valueCrop1
-				+ _valueCrop2
-				+ _valueCrop3
-				+ _valueCrop4
-				+ _valueCrop5
-				+ _valueCrop6
-				+ _valueCrop7
-				+ _valueCrop8
-				+ _valueCrop9
-				+ _valueCrop10;
-
-			_currentMoney += _totalvalue;
-
-			_totalMoney +=
-				_valueCrop1
-				+ _valueCrop2
-				+ _valueCrop3
-				+ _valueCrop4
-				+ _valueCrop5
-				+ _valueCrop6
-				+ _valueCrop7
-				+ _valueCrop8
-				+ _valueCrop9
-				+ _valueCrop10;
-
-			_SceneReferences.SetProgramVariable("_currentCrop1", 0);
-			_SceneReferences.SetProgramVariable("_currentCrop2", 0);
-			_SceneReferences.SetProgramVariable("_currentCrop3", 0);
-			_SceneReferences.SetProgramVariable("_currentCrop4", 0);
-			_SceneReferences.SetProgramVariable("_currentCrop5", 0);
-			_SceneReferences.SetProgramVariable("_currentCrop6", 0);
-			_SceneReferences.SetProgramVariable("_currentCrop7", 0);
-			_SceneReferences.SetProgramVariable("_currentCrop8", 0);
-			_SceneReferences.SetProgramVariable("_currentCrop9", 0);
-			_SceneReferences.SetProgramVariable("_currentCrop10", 0);
-
-			_SceneReferences.SetProgramVariable("_currentMoney", _currentMoney);
-			_SceneReferences.SetProgramVariable("_totalMoney", _totalMoney);
-
-			var emission = _particleFX.emission;
-			if (_totalvalue < 100)
-			{
-				emission.SetBursts(
-			new ParticleSystem.Burst[]
-			{
-				new ParticleSystem.Burst(0.0f, (Single)_totalvalue)
-			});
-			}
-			
-
-			if (_totalvalue > 100)
-			{
-				Single s = 100;
-				emission.SetBursts(
-			new ParticleSystem.Burst[]
-			{
-				new ParticleSystem.Burst(0.0f, s)
-			});
-			}
-
-			_amountCrop = 0;
-
-			for (int i = 1; i < 11;  i++)
-			{
-				string _key = "_currentCrop" + i.ToString();
-				PlayerData.SetInt(_key, 0);
-			}
-
-			UdonBehaviour _persistence = (UdonBehaviour)_SceneReferences.GetProgramVariable("_persistence");
-
-			_persistence.SendCustomEvent("PersistData_Save");
-
-			_sfxSharedUIAudioSource.PlayOneShot(_sfxBuy1);
-			_particleFX.Play();
+			emission.SetBursts(
+		new ParticleSystem.Burst[]
+		{
+					new ParticleSystem.Burst(0.0f, (Single)total)
+		});
 		}
+
+
+		if (total > 100)
+		{
+			Single s = 100;
+			emission.SetBursts(
+		new ParticleSystem.Burst[]
+		{
+					new ParticleSystem.Burst(0.0f, s)
+		});
+		}
+
+		_sfxSharedUIAudioSource.PlayOneShot(_sfxBuy1);
+		_particleFX.Play();
 	}
+	/*	public void SellAll()
+		{
+			_sfxSharedUIAudioSource = (AudioSource)_SceneReferences.GetProgramVariable("_sfxSharedUIAudioSource");
+			_sfxBuy1 = (AudioClip)_SceneReferences.GetProgramVariable("_sfxBuy1");
+
+			int _currentCrop1 = (int)_SceneReferences.GetProgramVariable("_currentCrop1");
+			int _currentCrop2 = (int)_SceneReferences.GetProgramVariable("_currentCrop2");
+			int _currentCrop3 = (int)_SceneReferences.GetProgramVariable("_currentCrop3");
+			int _currentCrop4 = (int)_SceneReferences.GetProgramVariable("_currentCrop4");
+			int _currentCrop5 = (int)_SceneReferences.GetProgramVariable("_currentCrop5");
+			int _currentCrop6 = (int)_SceneReferences.GetProgramVariable("_currentCrop6");
+			int _currentCrop7 = (int)_SceneReferences.GetProgramVariable("_currentCrop7");
+			int _currentCrop8 = (int)_SceneReferences.GetProgramVariable("_currentCrop8");
+			int _currentCrop9 = (int)_SceneReferences.GetProgramVariable("_currentCrop9");
+			int _currentCrop10 = (int)_SceneReferences.GetProgramVariable("_currentCrop10");
+
+
+			_amountCrop =
+				_currentCrop1
+				+ _currentCrop2
+				+ _currentCrop3
+				+ _currentCrop4
+				+ _currentCrop5
+				+ _currentCrop6
+				+ _currentCrop7
+				+ _currentCrop8
+				+ _currentCrop9
+				+ _currentCrop10;
+
+			if (_amountCrop > 0)
+			{
+				int _currentMoney = (int)_SceneReferences.GetProgramVariable("_currentMoney");
+				int _totalMoney = (int)_SceneReferences.GetProgramVariable("_totalMoney");
+
+				int _valueCrops = (int)_SceneReferences.GetProgramVariable("_valueCrops");
+
+				int _valueCrop1 = (int)_SceneReferences.GetProgramVariable("_valueCrop1");
+				_valueCrop1 += _valueCrops;
+				_valueCrop1 *= _currentCrop1;
+
+				int _valueCrop2 = (int)_SceneReferences.GetProgramVariable("_valueCrop2");
+				_valueCrop2 += _valueCrops;
+				_valueCrop2 *= _currentCrop2;
+
+				int _valueCrop3 = (int)_SceneReferences.GetProgramVariable("_valueCrop3");
+				_valueCrop3 += _valueCrops;
+				_valueCrop3 *= _currentCrop3;
+
+				int _valueCrop4 = (int)_SceneReferences.GetProgramVariable("_valueCrop4");
+				_valueCrop4 += _valueCrops;
+				_valueCrop4 *= _currentCrop4;
+
+				int _valueCrop5 = (int)_SceneReferences.GetProgramVariable("_valueCrop5");
+				_valueCrop5 += _valueCrops;
+				_valueCrop5 *= _currentCrop5;
+
+				int _valueCrop6 = (int)_SceneReferences.GetProgramVariable("_valueCrop6");
+				_valueCrop6 += _valueCrops;
+				_valueCrop6 *= _currentCrop6;
+
+				int _valueCrop7 = (int)_SceneReferences.GetProgramVariable("_valueCrop7");
+				_valueCrop7 += _valueCrops;
+				_valueCrop7 *= _currentCrop7;
+
+				int _valueCrop8 = (int)_SceneReferences.GetProgramVariable("_valueCrop8");
+				_valueCrop8 += _valueCrops;
+				_valueCrop8 *= _currentCrop8;
+
+				int _valueCrop9 = (int)_SceneReferences.GetProgramVariable("_valueCrop9");
+				_valueCrop9 += _valueCrops;
+				_valueCrop9 *= _currentCrop9;
+
+				int _valueCrop10 = (int)_SceneReferences.GetProgramVariable("_valueCrop10");
+				_valueCrop10 += _valueCrops;
+				_valueCrop10 *= _currentCrop10;
+
+				int _totalvalue = 0;
+
+				_totalvalue +=
+					_valueCrop1
+					+ _valueCrop2
+					+ _valueCrop3
+					+ _valueCrop4
+					+ _valueCrop5
+					+ _valueCrop6
+					+ _valueCrop7
+					+ _valueCrop8
+					+ _valueCrop9
+					+ _valueCrop10;
+
+				_currentMoney += _totalvalue;
+
+				_totalMoney +=
+					_valueCrop1
+					+ _valueCrop2
+					+ _valueCrop3
+					+ _valueCrop4
+					+ _valueCrop5
+					+ _valueCrop6
+					+ _valueCrop7
+					+ _valueCrop8
+					+ _valueCrop9
+					+ _valueCrop10;
+
+				_SceneReferences.SetProgramVariable("_currentCrop1", 0);
+				_SceneReferences.SetProgramVariable("_currentCrop2", 0);
+				_SceneReferences.SetProgramVariable("_currentCrop3", 0);
+				_SceneReferences.SetProgramVariable("_currentCrop4", 0);
+				_SceneReferences.SetProgramVariable("_currentCrop5", 0);
+				_SceneReferences.SetProgramVariable("_currentCrop6", 0);
+				_SceneReferences.SetProgramVariable("_currentCrop7", 0);
+				_SceneReferences.SetProgramVariable("_currentCrop8", 0);
+				_SceneReferences.SetProgramVariable("_currentCrop9", 0);
+				_SceneReferences.SetProgramVariable("_currentCrop10", 0);
+
+				_SceneReferences.SetProgramVariable("_currentMoney", _currentMoney);
+				_SceneReferences.SetProgramVariable("_totalMoney", _totalMoney);
+
+				var emission = _particleFX.emission;
+				if (_totalvalue < 100)
+				{
+					emission.SetBursts(
+				new ParticleSystem.Burst[]
+				{
+					new ParticleSystem.Burst(0.0f, (Single)_totalvalue)
+				});
+				}
+
+
+				if (_totalvalue > 100)
+				{
+					Single s = 100;
+					emission.SetBursts(
+				new ParticleSystem.Burst[]
+				{
+					new ParticleSystem.Burst(0.0f, s)
+				});
+				}
+
+				_amountCrop = 0;
+
+				for (int i = 1; i < 11;  i++)
+				{
+					string _key = "_currentCrop" + i.ToString();
+					PlayerData.SetInt(_key, 0);
+				}
+
+				UdonBehaviour _persistence = (UdonBehaviour)_SceneReferences.GetProgramVariable("_persistence");
+
+				_persistence.SendCustomEvent("PersistData_Save");
+
+				_sfxSharedUIAudioSource.PlayOneShot(_sfxBuy1);
+				_particleFX.Play();
+			}*/
+
 }
