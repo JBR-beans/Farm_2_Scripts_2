@@ -3,6 +3,7 @@ using TMPro;
 using UdonSharp;
 using UnityEngine;
 using UnityEngine.Rendering.PostProcessing;
+using UnityEngine.UI;
 using VRC.SDKBase;
 using VRC.SDKBase.Midi;
 using VRC.Udon;
@@ -40,6 +41,7 @@ public class SceneReferences : UdonSharpBehaviour
 	public int[] _upgradelevelResetTime;
 	public Mesh[] _cropMeshes;
 	public MeshFilter[] _cropMeshFilters;
+	public bool[] _boughtCrops;
 
 
 
@@ -52,72 +54,75 @@ public class SceneReferences : UdonSharpBehaviour
 	public TextMeshProUGUI[] _displayCropLevelYields;
 	public TextMeshProUGUI[] _displayCropLevelResetTimes;
 
+	public Button _buttonToggleEditMode;
+	public TextMeshProUGUI _displayAutoBots;
 
-	
 
-/*	public string GenerateCropData(string data, int cropID)
-	{
 
-		string _cropData = data + cropID.ToString();
 
-		return _cropData;
-
-	}
-	public void RerollQuest()
-	{
-		// possibly cost money, otherwise just a reroll button
-		QuestStarted();
-	}
-	public void QuestStarted()
-	{
-		
-		_questCurrentNeededAmount = Random.Range(_questMinAmount, _questMaxAmount);
-
-		int ran = Random.Range(1, _cropNames.Length);
-		for(int i = 1; i < _cropNames.Length; i++)
+	/*	public string GenerateCropData(string data, int cropID)
 		{
-			if (i == ran)
-			{
-				_ranID = i;
-				_cropTag = _cropNames[i];
-			}
-		}
 
-		_cropData = GenerateCropData("_currentCrop", _ranID);
-		_isQuesting = true;
-	}
-	public void UpdateQuestProgress()
-	{
-		if (_isQuesting == true)
+			string _cropData = data + cropID.ToString();
+
+			return _cropData;
+
+		}
+		public void RerollQuest()
 		{
-			_questCurrentAmount = (int)_SelfReference.GetProgramVariable(_cropData);
-
-			_hudCurrentQuestProgress.text = "Collect " + _questCurrentNeededAmount.ToString() + " " + _cropTag;
-			_hudCurrentQuestProgress.text += "\n";
-			_hudCurrentQuestProgress.text += "Collected: " + _questCurrentAmount.ToString();
-
-			if (_questCurrentAmount >= _questCurrentNeededAmount)
-			{
-				QuestCompleted();
-			}
+			// possibly cost money, otherwise just a reroll button
+			QuestStarted();
 		}
-		
-		//_hudCurrentQuestProgress.text = ;
-	}
-	public void QuestCompleted()
-	{
-		// do logic
-		_questSupplyDrop.SetActive(true);
-		_questsCompleted++;
-		_currentMoney += _moneyBonus;
-		_isQuesting = false;
-		// start new random ambient quest
+		public void QuestStarted()
+		{
 
-		// NEEDS USER INPUT
-		// if user has lots of crops, quest randomizer will constantly award money 
-		// need user input to start new quest, cannot be automatic without some kind of cooldown or check
-		// QuestStarted();
-	}*/
+			_questCurrentNeededAmount = Random.Range(_questMinAmount, _questMaxAmount);
+
+			int ran = Random.Range(1, _cropNames.Length);
+			for(int i = 1; i < _cropNames.Length; i++)
+			{
+				if (i == ran)
+				{
+					_ranID = i;
+					_cropTag = _cropNames[i];
+				}
+			}
+
+			_cropData = GenerateCropData("_currentCrop", _ranID);
+			_isQuesting = true;
+		}
+		public void UpdateQuestProgress()
+		{
+			if (_isQuesting == true)
+			{
+				_questCurrentAmount = (int)_SelfReference.GetProgramVariable(_cropData);
+
+				_hudCurrentQuestProgress.text = "Collect " + _questCurrentNeededAmount.ToString() + " " + _cropTag;
+				_hudCurrentQuestProgress.text += "\n";
+				_hudCurrentQuestProgress.text += "Collected: " + _questCurrentAmount.ToString();
+
+				if (_questCurrentAmount >= _questCurrentNeededAmount)
+				{
+					QuestCompleted();
+				}
+			}
+
+			//_hudCurrentQuestProgress.text = ;
+		}
+		public void QuestCompleted()
+		{
+			// do logic
+			_questSupplyDrop.SetActive(true);
+			_questsCompleted++;
+			_currentMoney += _moneyBonus;
+			_isQuesting = false;
+			// start new random ambient quest
+
+			// NEEDS USER INPUT
+			// if user has lots of crops, quest randomizer will constantly award money 
+			// need user input to start new quest, cannot be automatic without some kind of cooldown or check
+			// QuestStarted();
+		}*/
 
 	/*public void HUDSetCurrentCropTotals()
 	{
@@ -150,7 +155,7 @@ public class SceneReferences : UdonSharpBehaviour
 		_hudTotalCrop9.text = _totalCrop9.ToString();
 		_hudTotalCrop10.text = _totalCrop10.ToString();
 	}*/
-	
+
 
 	[Header("Persistence Configuration")]
 	public UdonBehaviour _persistence;
@@ -159,8 +164,11 @@ public class SceneReferences : UdonSharpBehaviour
 	public AudioClip _sfxBuy1;
 	public AudioClip _sfxBoughtItem;
 	public TextMeshProUGUI _hudCheaperCropsUpgradeBought;
+
 	public int _totalAutoBot = 0;
+	public int _costUpgradeMaxAutoBot;
 	public int _maxAutoBot;
+
 	public TextMeshProUGUI _debug;
 	public string _debugText;
 
@@ -204,7 +212,19 @@ public class SceneReferences : UdonSharpBehaviour
 /*
 	[Header("Crop references and data")]
 	[Header("Leave index 0 blank, 1 based array")]*/
+	public void Upgrade_MaxAutoBot()
+	{
+		if (_currentMoney >= _costUpgradeMaxAutoBot)
+		{
+			_currentMoney -= _costUpgradeMaxAutoBot;
+			_maxAutoBot++;
+		}
+	}
 
+	public void Upgrade_FX()
+	{
+		_sfxSharedUIAudioSource.PlayOneShot(_sfxBuy1);
+	}
 	public void Start()
 	{
 		Initialize_Data();
@@ -222,7 +242,9 @@ public class SceneReferences : UdonSharpBehaviour
 		Assign_ID();
 		Initialize_Names();
 		Initialize_CurrentAmount();
+		Initialize_TotalAmount();
 		Initialize_Value();
+		Initialize_Bought();
 		Initialize_UpgradeLevel_Yield();
 		Initialize_UpgradeLevel_ResetTime();
 		Initialize_Displays();
@@ -235,12 +257,14 @@ public class SceneReferences : UdonSharpBehaviour
 	}
 	public void Assign_Saved_Data()
 	{
-		Assign_Saved_CurrentAmount();
+
 		Assign_Saved_Value();
+		Assign_Saved_CurrentAmount();
+		Assign_Saved_TotalAmount();
+		Assign_Saved_Bought();
 		Assign_Saved_UpgradeLevel_Yield();
 		Assign_Saved_UpgradeLevel_ResetTime();
 	}
-
 	public void Assign_ID()
 	{
 		for (int i = 0; i < _crops.Length; i++)
@@ -249,6 +273,10 @@ public class SceneReferences : UdonSharpBehaviour
 		}
 	}
 	// unsaved initialize
+	public void Initialize_Bought()
+	{
+		_boughtCrops = new bool[_crops.Length];
+	}
 	public void Initialize_Names()
 	{
 		_nameCrops = new string[_cropMeshes.Length];
@@ -262,6 +290,10 @@ public class SceneReferences : UdonSharpBehaviour
 	public void Initialize_CurrentAmount()
 	{
 		_currentCrops = new int[_crops.Length];
+	}
+	public void Initialize_TotalAmount()
+	{
+		_totalCrops = new int[_crops.Length];
 	}
 	public void Initialize_Value()
 	{
@@ -344,14 +376,7 @@ public class SceneReferences : UdonSharpBehaviour
 	}
 
 	// saved
-	public void Assign_Saved_TotalAmount()
-	{
-		_totalCrops = new int[_crops.Length];
-		for (int i = 0; i < _crops.Length; i++)
-		{
-			_crops[i].SetProgramVariable("_totalCrop", _totalCrops[i]);
-		}
-	}
+
 	public void Assign_Saved_CurrentAmount()
 	{
 
@@ -360,11 +385,25 @@ public class SceneReferences : UdonSharpBehaviour
 			_crops[i].SetProgramVariable("_currentCrop", _currentCrops[i]);
 		}
 	}
+	public void Assign_Saved_TotalAmount()
+	{
+		for (int i = 0; i < _crops.Length; i++)
+		{
+			_crops[i].SetProgramVariable("_totalCrop", _totalCrops[i]);
+		}
+	}
 	public void Assign_Saved_Value()
 	{
 		for (int i = 0; i < _crops.Length; i++)
 		{
 			_crops[i].SetProgramVariable("_valueCrop", _valueCrops[i]);
+		}
+	}
+	public void Assign_Saved_Bought()
+	{
+		for (int i = 0; i < _crops.Length; i++)
+		{
+			_crops[i].SetProgramVariable("_bought", _boughtCrops[i]);
 		}
 	}
 	public void Assign_Saved_UpgradeLevel_Yield()
@@ -392,6 +431,7 @@ public class SceneReferences : UdonSharpBehaviour
 	}
 	public void Update_Displays()
 	{
+		_displayAutoBots.text = "AutoBots in use: " + _totalAutoBot.ToString() + "/" + _maxAutoBot.ToString();
 		for (int i = 0; i < _crops.Length; i++)
 		{
 			_HUDcurrent[i].text = _currentCrops[i].ToString();

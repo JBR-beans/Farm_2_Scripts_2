@@ -18,9 +18,6 @@ public class SellCropMenu : UdonSharpBehaviour
 	public AudioSource _sfxSharedUIAudioSource;
 	public AudioClip _sfxBuy1;
 
-
-
-
 	/*	public void IncreaseCropAmount()
 		{
 			_sfxSharedUIAudioSource = (AudioSource)_SceneReferences.GetProgramVariable("_sfxSharedUIAudioSource");
@@ -395,9 +392,6 @@ public class SellCropMenu : UdonSharpBehaviour
 
 		_SceneReferences.SetProgramVariable("_currentCrops", current);
 		total = 0;
-
-		UdonBehaviour p = (UdonBehaviour)_SceneReferences.GetProgramVariable("_persistence");
-		p.SendCustomEvent("Save_Data");
 
 	}
 	public void SellFX()

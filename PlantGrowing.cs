@@ -16,6 +16,7 @@ public class PlantGrowing : UdonSharpBehaviour
 	public int _currentCrop;
 	public int _totalCrop;
 	public int _valueCrop;
+	public bool _boughtCrop;
 
 	public MeshFilter _cropMeshFilter;
 	public int _upgradeLevelYield = 1;
@@ -95,7 +96,11 @@ public class PlantGrowing : UdonSharpBehaviour
 	public int _maxGrowthPhase;
 	public GameObject _cropRoot;
 
-
+	public void Save_Data()
+	{
+		UdonBehaviour p = (UdonBehaviour)_SceneReferences.GetProgramVariable("_persistence");
+		p.SendCustomEvent("Save_Data");
+	}
 	public void FixedUpdate()
 	{
 
@@ -470,7 +475,7 @@ public class PlantGrowing : UdonSharpBehaviour
 			HarvestAutobot();
 		}
 		_cropRoot.transform.localScale = new Vector3(0.1f, 0.1f, 0.1f);
-		//PersistData_Save();
+
 		_cycleReseting = true;
 	}
 
