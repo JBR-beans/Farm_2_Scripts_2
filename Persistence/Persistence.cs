@@ -11,7 +11,8 @@ public class Persistence : UdonSharpBehaviour
 {
 	public UdonBehaviour _SceneReferences;
 	public TextMeshProUGUI _dbgtxt_P_CurrentMoney;
-	private const string _TESTkeyCurrentMoney = "_currentMoney";
+
+	private const string _key_currentMoney = "_currentMoney";
     private const string _keyQuestCompleted = "_questsCompleted";
 	public int _currentMoney;
 	public VRCPlayerApi _playerAPI;
@@ -20,11 +21,28 @@ public class Persistence : UdonSharpBehaviour
 
 	 public void Start()
     {
-        _playerAPI = Networking.LocalPlayer;
-        PersistData_Load();
+        
     }
 
-    public void PersistData_Save()
+
+    public void Save_Data()
+    {
+		if (Networking.LocalPlayer.isLocal)
+        {
+			int _currentMoney = (int)_SceneReferences.GetProgramVariable("_currentMoney");
+			PlayerData.SetInt(_key_currentMoney, _currentMoney);
+
+		}
+
+	}
+
+    public void Load_Data()
+    {
+		var currentMoney = PlayerData.GetInt(Networking.LocalPlayer, _key_currentMoney);
+        _SceneReferences.SetProgramVariable("_currentMoney", currentMoney);
+	}
+
+  /*  public void PersistData_Save()
     {
         if (_playerAPI.isLocal)
         {
@@ -34,13 +52,13 @@ public class Persistence : UdonSharpBehaviour
 			var currentMoney = PlayerData.GetInt(Networking.LocalPlayer, _TESTkeyCurrentMoney);
 			var questsCompleted = PlayerData.GetInt(Networking.LocalPlayer, _keyQuestCompleted);
 
-			PlayerData.SetInt(_TESTkeyCurrentMoney, _currentMoney);
+			//PlayerData.SetInt(_TESTkeyCurrentMoney, _currentMoney);
 			PlayerData.SetInt(_keyQuestCompleted, _questsCompleted);
 
 		}
-    }
+    }*/
 
-    public void PersistData_Load()
+/*    public void PersistData_Load()
     {
         if (_playerAPI.isLocal)
         {
@@ -53,14 +71,14 @@ public class Persistence : UdonSharpBehaviour
 			_SceneReferences.SetProgramVariable("_currentMoney", _currentMoney);
 			_SceneReferences.SetProgramVariable("_questsCompleted", _questsCompleted);
 		}
-    }
+    }*/
 
     public override void OnPlayerDataUpdated(VRCPlayerApi player, PlayerData.Info[] infos)
     {
         if (player.isLocal)
         {
-            PersistData_Load();
-            _playerAPI = player;
-        }
+            Load_Data();
+
+		}
     }
 }

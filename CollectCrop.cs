@@ -10,7 +10,7 @@ public class CollectCrop : UdonSharpBehaviour
 	public UdonBehaviour _SceneReferences;
 	public UdonBehaviour _LocalReferences;
 	public int _cropID;
-	public int[] _currentCrops;
+	//public int[] _currentCrops;
 
 	public void Start()
 	{
@@ -27,16 +27,28 @@ public class CollectCrop : UdonSharpBehaviour
 	public void LinkReferences()
 	{
 		_SceneReferences = (UdonBehaviour)_LocalReferences.GetProgramVariable("_SceneReferences");
+		//_cropID = (int)_LocalReferences.GetProgramVariable("_cropID");
 	}
 
 	public void Collect()
 	{
 
-		_currentCrops = (int[])_SceneReferences.GetProgramVariable("_currentCrops");
-		int c = _currentCrops[_cropID];
-		_currentCrops[_cropID] = c + 1;
-
+		int[] _currentCrops = (int[])_SceneReferences.GetProgramVariable("_currentCrops");
+		_cropID = (int)_LocalReferences.GetProgramVariable("_cropID");
+		int current = _currentCrops[_cropID];
+		current++;
+		_currentCrops[_cropID] = current;
 		_SceneReferences.SetProgramVariable("_currentCrops", _currentCrops);
+
+		/*for (int i = 0; i < _currentCrops.Length; i++)
+		{
+			if (_currentCrops[i] == _cropID)
+			{
+				_currentCrops[i] += 1;
+			}
+		}
+
+		_SceneReferences.SetProgramVariable("_currentCrops", _currentCrops);*/
 
 		CollectionFX();
 	}

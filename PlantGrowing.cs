@@ -16,27 +16,26 @@ public class PlantGrowing : UdonSharpBehaviour
 	public int _currentCrop;
 	public int _totalCrop;
 	public int _valueCrop;
-	//public Mesh _cropMesh;
+
 	public MeshFilter _cropMeshFilter;
 	public int _upgradeLevelYield = 1;
 	public int _upgradeLevelResetTime = 1;
 	public ParticleSystem _ps1;
 	public ParticleSystem _ps2;
 
+	public TextMeshProUGUI _displayCropID;
+	public TextMeshProUGUI _displayCropName;
+	public TextMeshProUGUI _displayCropAmount;
+	public TextMeshProUGUI _displayCropValue;
+	public TextMeshProUGUI _displayCropLevelYield;
+	public TextMeshProUGUI _displayCropLevelResetTime;
+	
 
 	[Header("Keys")]
 	public string _keyUpgradeLevelResetTime;
 	public string _keyUpgradeLevelYield;
 	public string _keyCurrentCropAmount;
 	public VRCPlayerApi _playerAPI;
-
-	[Header("configure crop")]
-
-	
-
-	
-	
-	
 
 	[Header("Configure Upgrades")]
 	public int _Yield = 1;
@@ -85,7 +84,6 @@ public class PlantGrowing : UdonSharpBehaviour
 
 	[Header("debug views")]
 	public TextMeshProUGUI _debugView1;
-	//public TextMeshProUGUI _debugView2;
 
 	[Header("INTERNAL")]
 	public int _growthPhase = 0;

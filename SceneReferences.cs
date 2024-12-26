@@ -12,7 +12,7 @@ public class SceneReferences : UdonSharpBehaviour
 	// fields with "total" count lifetime, for example as achievement or to unlock things
 	// duplicate crop to make more different plants
 	public UdonBehaviour _SelfReference;
-	[Header("Quests")]
+	/*[Header("Quests")]
 	public bool _isQuesting;
 	public GameObject _questSupplyDrop;
 	public string _cropTag;
@@ -26,7 +26,7 @@ public class SceneReferences : UdonSharpBehaviour
 	public int _questCurrentAmount;
 	public int _questCurrentNeededAmount;
 	public int _moneyBonus;
-	public int _questsCompleted;
+	public int _questsCompleted;*/
 
 
 	[Header("NEEDS REFACTOR")]
@@ -39,24 +39,23 @@ public class SceneReferences : UdonSharpBehaviour
 	public int[] _upgradelevelYield;
 	public int[] _upgradelevelResetTime;
 	public Mesh[] _cropMeshes;
+	public MeshFilter[] _cropMeshFilters;
+
+
 
 	//hud
 	public TextMeshProUGUI[] _HUDcurrent;
+	public TextMeshProUGUI[] _displayCropID;
+	public TextMeshProUGUI[] _displayCropNames;
+	public TextMeshProUGUI[] _displayCropAmounts;
+	public TextMeshProUGUI[] _displayCropValues;
+	public TextMeshProUGUI[] _displayCropLevelYields;
+	public TextMeshProUGUI[] _displayCropLevelResetTimes;
 
 
-	public void Update()
-	{
-		UpdateQuestProgress();
-		//HUDSetCurrentCropTotals();
-		Display_Current();
-		_hudCurrentMoney.text = _currentMoney.ToString();
-		//_hudTotalMoney.text = _totalMoney.ToString();
-		//_hudCropsPlanted.text = _totalCrop.ToString();
+	
 
-		//_hudCropsValue.text = _valueCrops.ToString();
-	}
-
-	public string GenerateCropData(string data, int cropID)
+/*	public string GenerateCropData(string data, int cropID)
 	{
 
 		string _cropData = data + cropID.ToString();
@@ -64,7 +63,6 @@ public class SceneReferences : UdonSharpBehaviour
 		return _cropData;
 
 	}
-
 	public void RerollQuest()
 	{
 		// possibly cost money, otherwise just a reroll button
@@ -119,9 +117,9 @@ public class SceneReferences : UdonSharpBehaviour
 		// if user has lots of crops, quest randomizer will constantly award money 
 		// need user input to start new quest, cannot be automatic without some kind of cooldown or check
 		// QuestStarted();
-	}
+	}*/
 
-	public void HUDSetCurrentCropTotals()
+	/*public void HUDSetCurrentCropTotals()
 	{
 
 
@@ -137,10 +135,6 @@ public class SceneReferences : UdonSharpBehaviour
 		_hudCurrentCrop10.text = _currentCrop10.ToString();
 		
 		_debug.text = _debugText;
-
-
-
-
 	}
 
 	public void HUDSetTotalCropTotals()
@@ -155,8 +149,9 @@ public class SceneReferences : UdonSharpBehaviour
 		_hudTotalCrop8.text = _totalCrop8.ToString();
 		_hudTotalCrop9.text = _totalCrop9.ToString();
 		_hudTotalCrop10.text = _totalCrop10.ToString();
-	}
+	}*/
 	
+
 	[Header("Persistence Configuration")]
 	public UdonBehaviour _persistence;
 	[Header("Game World")]
@@ -169,15 +164,7 @@ public class SceneReferences : UdonSharpBehaviour
 	public TextMeshProUGUI _debug;
 	public string _debugText;
 
-	
-
-	[Header("HUD")]
-	[Header("Crop mesh visuals for crop amount")]
-	[Header("Leave index 0 blank, 1 based array")]
-	public MeshFilter[] _cropMeshFilters;
-
-	
-
+/*
 	[Header("Display current crop amounts")]
 	public TextMeshProUGUI _hudCurrentCrop1;
 	public TextMeshProUGUI _hudCurrentCrop2;
@@ -201,62 +188,59 @@ public class SceneReferences : UdonSharpBehaviour
 	public TextMeshProUGUI _hudTotalCrop8;
 	public TextMeshProUGUI _hudTotalCrop9;
 	public TextMeshProUGUI _hudTotalCrop10;
-
+*/
 	[Header("Current money")]
 	public TextMeshProUGUI _hudCurrentMoney;
-	[Header("Total money")]
-	public TextMeshProUGUI _hudTotalMoney;
-	[Header("Total crops planted")]
-	public TextMeshProUGUI _hudCropsPlanted;
-	[Header("modifiers")]
-	public TextMeshProUGUI _hudCropsValue;
 
-	[Header("< INTERNAL | handled through script")]
-	[Header("handled through script")]
-	[Header("global modifiers")]
 	public int _currentCrop = 0;
 	public int _totalCrop = 0;
-	//public int _valueCrops = 0;
-	[Header("player stats")]
+
 	public int _currentMoney = 0;
-	[Header("totals")]
+
 	public int _totalMoney = 0;
 	public int _CropsPlanted = 0;
-	[Header("Unlockables")]
+
 	public bool _unlockedAutoBot = false;
 /*
 	[Header("Crop references and data")]
 	[Header("Leave index 0 blank, 1 based array")]*/
 
-
-
-
 	public void Start()
 	{
-		
+		Initialize_Data();
+		Assign_Unsaved_Data();
+	}
+
+	public void Update()
+	{
+		Update_Displays();
+		_hudCurrentMoney.text = _currentMoney.ToString();
+	}
+
+	public void Initialize_Data()
+	{
 		Assign_ID();
 		Initialize_Names();
-		Assign_Name();
 		Initialize_CurrentAmount();
-		//Assign_Saved_CurrentAmount();
-		//Assign_Saved_TotalAmount();
 		Initialize_Value();
-		Assign_Value();
-		//Assign_Saved_Value();
-		Assign_CropMeshes();
-		//Assign_Saved_UpgradeLevel_Yield();
-		//Assign_Saved_UpgradeLevel_ResetTime();
-
-
-
-
-		/*for (int i = 1; i < _cropMeshFilters.Length; i++)
-		{
-			_cropMeshFilters[i].mesh = _cropMeshes[i];
-		}*/
-		QuestStarted();
+		Initialize_UpgradeLevel_Yield();
+		Initialize_UpgradeLevel_ResetTime();
+		Initialize_Displays();
 	}
-	
+	public void Assign_Unsaved_Data()
+	{
+		Assign_CropMeshes();
+		Assign_Name();
+		Assign_Value();
+	}
+	public void Assign_Saved_Data()
+	{
+		Assign_Saved_CurrentAmount();
+		Assign_Saved_Value();
+		Assign_Saved_UpgradeLevel_Yield();
+		Assign_Saved_UpgradeLevel_ResetTime();
+	}
+
 	public void Assign_ID()
 	{
 		for (int i = 0; i < _crops.Length; i++)
@@ -264,38 +248,20 @@ public class SceneReferences : UdonSharpBehaviour
 			_crops[i].SetProgramVariable("_cropID", i);
 		}
 	}
+	// unsaved initialize
 	public void Initialize_Names()
 	{
-		_nameCrops = _cropNames;
-	}
-	public void Assign_Name()
-	{
-		for (int i = 0; i < _crops.Length; i++)
+		_nameCrops = new string[_cropMeshes.Length];
+
+		for (int i = 0; i < _cropMeshes.Length; i++)
 		{
-			_crops[i].SetProgramVariable("_cropName", _nameCrops[i]);
+			_nameCrops[i] = _cropMeshes[i].name;
+
 		}
 	}
-	
 	public void Initialize_CurrentAmount()
 	{
 		_currentCrops = new int[_crops.Length];
-	}
-	public void Assign_Saved_CurrentAmount()
-	{
-		_currentCrops = new int[_crops.Length];
-		for (int i = 0; i < _crops.Length; i++)
-		{
-			_crops[i].SetProgramVariable("_currentCrop", _currentCrops[i]);
-		}
-	}
-
-	public void Assign_Saved_TotalAmount()
-	{
-		_totalCrops = new int[_crops.Length];
-		for (int i = 0; i < _crops.Length; i++)
-		{
-			_crops[i].SetProgramVariable("_totalCrop", _totalCrops[i]);
-		}
 	}
 	public void Initialize_Value()
 	{
@@ -304,11 +270,57 @@ public class SceneReferences : UdonSharpBehaviour
 
 		for (int i = 0; i < _crops.Length; i++)
 		{
-			_valueCrops[i] = i * 10;
+			_valueCrops[i] = (i * 10) + 10;
 		}
-		_valueCrops[0] = 10;
+	}
+	public void Initialize_UpgradeLevel_Yield()
+	{
+		_upgradelevelYield = new int[_crops.Length];
+
+	}
+	public void Initialize_UpgradeLevel_ResetTime()
+	{
+		_upgradelevelResetTime = new int[_crops.Length];
+	}
+	public void Initialize_Displays()
+	{
+
+		_displayCropNames = new TextMeshProUGUI[_crops.Length];
+
+		_displayCropAmounts = new TextMeshProUGUI[_crops.Length];
+
+		_displayCropValues = new TextMeshProUGUI[_crops.Length];
+
+		_displayCropLevelYields = new TextMeshProUGUI[_crops.Length];
+
+		_displayCropLevelResetTimes = new TextMeshProUGUI[_crops.Length];
+
+		_displayCropID = new TextMeshProUGUI[_crops.Length];
+
+		for (int i = 0; i < _crops.Length; i++)
+		{
+			_displayCropNames[i] = (TextMeshProUGUI)_crops[i].GetProgramVariable("_displayCropName");
+
+			_displayCropAmounts[i] = (TextMeshProUGUI)_crops[i].GetProgramVariable("_displayCropAmount");
+
+			_displayCropValues[i] = (TextMeshProUGUI)_crops[i].GetProgramVariable("_displayCropValue");
+
+			_displayCropLevelYields[i] = (TextMeshProUGUI)_crops[i].GetProgramVariable("_displayCropLevelYield");
+
+			_displayCropLevelResetTimes[i] = (TextMeshProUGUI)_crops[i].GetProgramVariable("_displayCropLevelResetTime");
+
+			_displayCropID[i] = (TextMeshProUGUI)_crops[i].GetProgramVariable("_displayCropID");
+		}
 	}
 
+	// unsaved assign
+	public void Assign_Name()
+	{
+		for (int i = 0; i < _crops.Length; i++)
+		{
+			_crops[i].SetProgramVariable("_cropName", _nameCrops[i]);
+		}
+	}
 	public void Assign_Value()
 	{
 		for (int i = 0; i < _crops.Length; i++)
@@ -316,14 +328,6 @@ public class SceneReferences : UdonSharpBehaviour
 			_crops[i].SetProgramVariable("_valueCrop", _valueCrops[i]);
 		}
 	}
-	public void Assign_Saved_Value()
-	{
-		for (int i = 0; i < _crops.Length; i++)
-		{
-			_crops[i].SetProgramVariable("_valueCrop", _valueCrops[i]);
-		}
-	}
-
 	public void Assign_CropMeshes()
 	{
 		for (int i = 0; i < _crops.Length; i++)
@@ -338,31 +342,76 @@ public class SceneReferences : UdonSharpBehaviour
 
 		}
 	}
+
+	// saved
+	public void Assign_Saved_TotalAmount()
+	{
+		_totalCrops = new int[_crops.Length];
+		for (int i = 0; i < _crops.Length; i++)
+		{
+			_crops[i].SetProgramVariable("_totalCrop", _totalCrops[i]);
+		}
+	}
+	public void Assign_Saved_CurrentAmount()
+	{
+
+		for (int i = 0; i < _crops.Length; i++)
+		{
+			_crops[i].SetProgramVariable("_currentCrop", _currentCrops[i]);
+		}
+	}
+	public void Assign_Saved_Value()
+	{
+		for (int i = 0; i < _crops.Length; i++)
+		{
+			_crops[i].SetProgramVariable("_valueCrop", _valueCrops[i]);
+		}
+	}
 	public void Assign_Saved_UpgradeLevel_Yield()
 	{
 		for (int i = 0; i < _crops.Length; i++)
 		{
+			if (_upgradelevelYield[i] < 1)
+			{
+				_upgradelevelYield[i] = 1;
+			}
 			_crops[i].SetProgramVariable("_upgradelevelYield", _upgradelevelYield[i]);
+			
 		}
 	}
-
 	public void Assign_Saved_UpgradeLevel_ResetTime()
 	{
 		for (int i = 0; i < _crops.Length; i++)
 		{
+			if (_upgradelevelResetTime[i] < 1)
+			{
+				_upgradelevelResetTime[i] = 1;
+			}
 			_crops[i].SetProgramVariable("_upgradelevelResetTime", _upgradelevelResetTime[i]);
 		}
 	}
-
-	public void Display_Current()
+	public void Update_Displays()
 	{
 		for (int i = 0; i < _crops.Length; i++)
 		{
 			_HUDcurrent[i].text = _currentCrops[i].ToString();
+
+			_displayCropID[i].text = _crops[i].GetProgramVariable("_cropID").ToString();
+
+			_displayCropNames[i].text = _nameCrops[i].ToString();
+
+			_displayCropAmounts[i].text = _currentCrops[i].ToString();
+
+			_displayCropValues[i].text = _valueCrops[i].ToString();
+
+			_displayCropLevelYields[i].text = _crops[i].GetProgramVariable("_upgradeLevelYield").ToString();
+
+			_displayCropLevelResetTimes[i].text = _crops[i].GetProgramVariable("_upgradeLevelResetTime").ToString();
+
 		}
 	}
 
-	//public Mesh[] _cropMeshes;
+	/*//public Mesh[] _cropMeshes;
 	[Header("crop1")]
 	public string _tagCrop1 = "crop1";
 	public int _currentCrop1 = 0;
@@ -421,7 +470,7 @@ public class SceneReferences : UdonSharpBehaviour
 	public string _tagCrop10 = "crop10";
 	public int _currentCrop10 = 0;
 	public int _totalCrop10 = 0;
-	public int _valueCrop10 = 0;
+	public int _valueCrop10 = 0;*/
 
 }
 
