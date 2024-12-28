@@ -30,29 +30,27 @@ public class AutoBotHandler : UdonSharpBehaviour
 		_autobotcount = (int)_SceneReferences.GetProgramVariable("_totalAutoBot"); ;
 	}
 
-    public void ToggleEditMode()
+    public void ToggleEditMode() 
     {
 		
 		CheckAutobotCount();
 		// dont display edit mode buttons for crop plots not yet bought, referenced from the buy button script
-		bool isbought = (bool)_CropPlotBuyButtonReference.GetProgramVariable("_isBought");
-		if (_isAutoBotAssigned == true && isbought == true)
+		bool _boughtCrop = (bool)_LocalReferences.GetProgramVariable("_boughtCrop");
+		if (_isAutoBotAssigned == true && _boughtCrop == true)
 		{
 			_btnDismiss.SetActive(!_btnDismiss.activeSelf);
 			_btnAssign.SetActive(false);
 
-			Button button = (Button)_SceneReferences.GetProgramVariable("_buttonToggleEditMode");
-			ColorBlock colors = button.colors;
-			colors.normalColor = Color.blue;
+			/*Image image = (Image)_SceneReferences.GetProgramVariable("_imageToggleEditMode");
+			image.color = Color.blue;*/
 		}
-		else if (_isAutoBotAssigned == false && isbought == true) 
+		else if (_isAutoBotAssigned == false && _boughtCrop == true) 
 		{
 			_btnAssign.SetActive(!_btnAssign.activeSelf);
 			_btnDismiss.SetActive(false);
 
-			Button button = (Button)_SceneReferences.GetProgramVariable("_buttonToggleEditMode");
-			ColorBlock colors = button.colors;
-			colors.normalColor = Color.blue;
+			/*Image image = (Image)_SceneReferences.GetProgramVariable("_imageToggleEditMode");
+			image.color = Color.blue;*/
 		}
 	}
 
@@ -60,6 +58,8 @@ public class AutoBotHandler : UdonSharpBehaviour
 	{
 		_btnAssign.SetActive(false);
 		_btnDismiss.SetActive(false);
+		/*Image image = (Image)_SceneReferences.GetProgramVariable("_imageToggleEditMode");
+		image.color = Color.white;*/
 	}
 
     public void AssignAutoBot()
@@ -75,9 +75,6 @@ public class AutoBotHandler : UdonSharpBehaviour
 			_isAutoBotAssigned = true;
 			UpgradesOn();
 			_EventCaller.SendCustomEvent("SendEventsToBehaviors2");
-			Button button = (Button)_SceneReferences.GetProgramVariable("_buttonToggleEditMode");
-			ColorBlock colors = button.colors;
-			colors.normalColor = Color.white;
 		}
 	}
 
@@ -94,9 +91,6 @@ public class AutoBotHandler : UdonSharpBehaviour
 		_isAutoBotAssigned = false;
 		UpgradesOff();
 		_EventCaller.SendCustomEvent("SendEventsToBehaviors2");
-		Button button = (Button)_SceneReferences.GetProgramVariable("_buttonToggleEditMode");
-		ColorBlock colors = button.colors;
-		colors.normalColor = Color.white;
 	}
 
     public void UpgradesOn()

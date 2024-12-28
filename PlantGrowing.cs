@@ -11,6 +11,7 @@ using VRC.Udon;
 public class PlantGrowing : UdonSharpBehaviour
 {
 	public UdonSharpBehaviour _SceneReferences;
+	public GameObject _CropRoot;
 	public int _cropID;
 	public string _cropName;
 	public int _currentCrop;
@@ -30,7 +31,8 @@ public class PlantGrowing : UdonSharpBehaviour
 	public TextMeshProUGUI _displayCropValue;
 	public TextMeshProUGUI _displayCropLevelYield;
 	public TextMeshProUGUI _displayCropLevelResetTime;
-	
+	public GameObject _buyButton;
+
 
 	[Header("Keys")]
 	public string _keyUpgradeLevelResetTime;
@@ -96,10 +98,15 @@ public class PlantGrowing : UdonSharpBehaviour
 	public int _maxGrowthPhase;
 	public GameObject _cropRoot;
 
-	public void Save_Data()
+
+	public void BuyPlot()
 	{
-		UdonBehaviour p = (UdonBehaviour)_SceneReferences.GetProgramVariable("_persistence");
-		p.SendCustomEvent("Save_Data");
+		int money = (int)_SceneReferences.GetProgramVariable("_currentMoney");
+		int _cost = 1;
+		if (money >= _cost)
+		{
+
+		}
 	}
 	public void FixedUpdate()
 	{
@@ -610,7 +617,7 @@ public class PlantGrowing : UdonSharpBehaviour
 			{
 				_upgradeLevelYield = _bufferUpgradeLevelYield;
 				/*_Yield = _upgradeLevelYield;*/
-			}
+			} //var public skibdi meow = new meowmeow[];
 		}
 	}
 
@@ -624,3 +631,4 @@ public class PlantGrowing : UdonSharpBehaviour
 		} */
 	}
 }
+

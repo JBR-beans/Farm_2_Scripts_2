@@ -41,7 +41,9 @@ public class SceneReferences : UdonSharpBehaviour
 	public int[] _upgradelevelResetTime;
 	public Mesh[] _cropMeshes;
 	public MeshFilter[] _cropMeshFilters;
+	public int[] _costCrops;
 	public bool[] _boughtCrops;
+	public GameObject[] _cropRoots;
 
 
 
@@ -54,7 +56,8 @@ public class SceneReferences : UdonSharpBehaviour
 	public TextMeshProUGUI[] _displayCropLevelYields;
 	public TextMeshProUGUI[] _displayCropLevelResetTimes;
 
-	public Button _buttonToggleEditMode;
+	//public Button _buttonToggleEditMode;
+	public Image _imageToggleEditMode;
 	public TextMeshProUGUI _displayAutoBots;
 
 
@@ -240,6 +243,7 @@ public class SceneReferences : UdonSharpBehaviour
 	public void Initialize_Data()
 	{
 		Assign_ID();
+		Initialize_CropRoots();
 		Initialize_Names();
 		Initialize_CurrentAmount();
 		Initialize_TotalAmount();
@@ -252,6 +256,7 @@ public class SceneReferences : UdonSharpBehaviour
 	public void Assign_Unsaved_Data()
 	{
 		Assign_CropMeshes();
+		Assign_CropRoots();
 		Assign_Name();
 		Assign_Value();
 	}
@@ -273,6 +278,14 @@ public class SceneReferences : UdonSharpBehaviour
 		}
 	}
 	// unsaved initialize
+	public void Initialize_CropCost()
+	{
+		_costCrops = new int[_crops.Length];
+	}
+	public void Initialize_CropRoots()
+	{
+		_cropRoots = new GameObject[_crops.Length];
+	}
 	public void Initialize_Bought()
 	{
 		_boughtCrops = new bool[_crops.Length];
@@ -346,6 +359,17 @@ public class SceneReferences : UdonSharpBehaviour
 	}
 
 	// unsaved assign
+	public void Assign_CropCost()
+	{
+
+	}
+	public void Assign_CropRoots()
+	{
+		for (int i = 0; i < _crops.Length;i++)
+		{
+			_cropRoots[i] = (GameObject)_crops[i].GetProgramVariable("_CropRoot");
+		}
+	}
 	public void Assign_Name()
 	{
 		for (int i = 0; i < _crops.Length; i++)

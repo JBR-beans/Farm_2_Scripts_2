@@ -3,7 +3,6 @@ using UdonSharp;
 using UnityEngine;
 using VRC.SDKBase;
 using VRC.Udon;
-using static UnityEditor.Experimental.GraphView.GraphView;
 
 public class CollectCrop : UdonSharpBehaviour
 {
