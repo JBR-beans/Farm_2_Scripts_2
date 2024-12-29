@@ -359,10 +359,10 @@ public class SceneReferences : UdonSharpBehaviour
 	}
 
 	// unsaved assign
-	public void Assign_CropCost()
+	/*public void Assign_CropCost()
 	{
 
-	}
+	}*/
 	public void Assign_CropRoots()
 	{
 		for (int i = 0; i < _crops.Length;i++)

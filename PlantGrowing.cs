@@ -10,6 +10,7 @@ using VRC.Udon;
 
 public class PlantGrowing : UdonSharpBehaviour
 {
+	[Header("Crop Data")]
 	public UdonSharpBehaviour _SceneReferences;
 	public GameObject _CropRoot;
 	public int _cropID;
@@ -19,12 +20,29 @@ public class PlantGrowing : UdonSharpBehaviour
 	public int _valueCrop;
 	public bool _boughtCrop;
 
+	[Header("Visuals")]
 	public MeshFilter _cropMeshFilter;
-	public int _upgradeLevelYield = 1;
-	public int _upgradeLevelResetTime = 1;
 	public ParticleSystem _ps1;
 	public ParticleSystem _ps2;
+	public ParticleSystem _particlesDirt;
+	public ParticleSystem _particleWater;
+	public GameObject _meshHarvested;
+	public GameObject _meshPlanted;
+	public GameObject _meshWaterTrigger;
+	public GameObject _meshHarvestTrigger;
+	public Image _imgGrowingVisual;
+	public Image _imgResetingVisual;
+	public GameObject _popupNeedsWater;
+	public GameObject _popupReadyToHarvest;
 
+	[Header("Audio")]
+	public AudioSource _sfxSource;
+	public AudioClip _sfxClipHarvest;
+	public AudioClip _sfxClipPlanted;
+	public AudioClip _sfxClipWatered;
+	public AudioClip _sfxClipCollect;
+
+	[Header("UI")]
 	public TextMeshProUGUI _displayCropID;
 	public TextMeshProUGUI _displayCropName;
 	public TextMeshProUGUI _displayCropAmount;
@@ -32,61 +50,21 @@ public class PlantGrowing : UdonSharpBehaviour
 	public TextMeshProUGUI _displayCropLevelYield;
 	public TextMeshProUGUI _displayCropLevelResetTime;
 	public GameObject _buyButton;
+	public TextMeshProUGUI _displayResetTime;
 
-
-	[Header("Keys")]
-	public string _keyUpgradeLevelResetTime;
-	public string _keyUpgradeLevelYield;
-	public string _keyCurrentCropAmount;
-	public VRCPlayerApi _playerAPI;
-
-	[Header("Configure Upgrades")]
+	[Header("Upgrades")]
 	public int _Yield = 1;
+	public float _ResetTime;
 	public int _modiferYield;
 	public int _maxLevelYield;
-	public int _upgradeCostYield;
-
-	public float _ResetTime;
+	public int _upgradeLevelYield = 1;
+	public int _upgradeLevelResetTime = 1;
 	public float _modifierResetTime;
 	public float _maxLevelResetTime;
+
+	[Header("Upgrade Costs")]
+	public int _upgradeCostYield;
 	public int _upgradeCostResetTime;
-
-	public int _upgradeCostAutoPlant;
-	public int _upgradeCostAutoWater;
-	public int _upgradeCostAutoHarvest;
-
-	[Header("changed in script")]
-	public bool _isAutoBotActive;
-
-	[Header("Mesh triggers")]
-	public GameObject _meshHarvested;
-	public GameObject _meshPlanted;
-	public GameObject _meshWaterTrigger;
-	public GameObject _meshHarvestTrigger;
-
-	[Header("configure VFX/SFX")]
-	public ParticleSystem _particlesDirt;
-	
-	public ParticleSystem _particleWater;
-	public AudioSource _sfxSource;
-	public AudioClip _sfxClipHarvest;
-	public AudioClip _sfxClipPlanted;
-	public AudioClip _sfxClipWatered;
-	public AudioClip _sfxClipCollect;
-
-	[Header("Indicators")]
-	public Image _imgGrowingVisual;
-	public Image _imgResetingVisual;
-
-	public GameObject _popupOutOfSeeds;
-	public GameObject _popupNeedsWater;
-	public GameObject _popupReadyToHarvest;
-
-	[Header("Upgrade Text View")]
-	public TextMeshProUGUI _txtResetTime;
-
-	[Header("debug views")]
-	public TextMeshProUGUI _debugView1;
 
 	[Header("INTERNAL")]
 	public int _growthPhase = 0;
@@ -97,6 +75,7 @@ public class PlantGrowing : UdonSharpBehaviour
 	public float _growSpeedMultiplier;
 	public int _maxGrowthPhase;
 	public GameObject _cropRoot;
+	public bool _isAutoBotActive;
 
 
 	public void BuyPlot()
@@ -231,103 +210,15 @@ public class PlantGrowing : UdonSharpBehaviour
 
 	public void ResetPlant()
 	{
-		/*if (_useSeeds == true)
-		{
-			switch (_cropTag)
-			{
-				case "crop1":
-
-					int _seedCrop1 = (int)_SceneReferences.GetProgramVariable("_seedCrop1");
-					if (_seedCrop1 > 0)
-					{
-						_SceneReferences.SetProgramVariable("_seedCrop1", _seedCrop1 - 1);
-						StartGrowing();
-					}
-					if (_seedCrop1 <= 0)
-					{
-
-						_popupOutOfSeeds.SetActive(true);
-					}
-					_sfxSource.PlayOneShot(_sfxClipPlanted);
-
-					break;
-
-				case "crop2":
-
-					int _seedCrop2 = (int)_SceneReferences.GetProgramVariable("_seedCrop2");
-					if (_seedCrop2 > 0)
-					{
-						_SceneReferences.SetProgramVariable("_seedCrop2", _seedCrop2 - 1);
-						StartGrowing();
-					}
-					if (_seedCrop2 <= 0)
-					{
-						_popupOutOfSeeds.SetActive(true);
-					}
-					_sfxSource.PlayOneShot(_sfxClipPlanted);
-					break;
-
-				case "crop3":
-
-					int _seedCrop3 = (int)_SceneReferences.GetProgramVariable("_seedCrop3");
-					if (_seedCrop3 > 0)
-					{
-						_SceneReferences.SetProgramVariable("_seedCrop3", _seedCrop3 - 1);
-						StartGrowing();
-					}
-					if (_seedCrop3 <= 0)
-					{
-						_popupOutOfSeeds.SetActive(true);
-					}
-					_sfxSource.PlayOneShot(_sfxClipPlanted);
-					break;
-
-				case "crop4":
-
-					int _seedCrop4 = (int)_SceneReferences.GetProgramVariable("_seedCrop4");
-					if (_seedCrop4 > 0)
-					{
-						_SceneReferences.SetProgramVariable("_seedCrop4", _seedCrop4 - 1);
-						StartGrowing();
-					}
-					if (_seedCrop4 <= 0)
-					{
-						_popupOutOfSeeds.SetActive(true);
-					}
-					_sfxSource.PlayOneShot(_sfxClipPlanted);
-					break;
-
-				case "crop5":
-
-					int _seedCrop5 = (int)_SceneReferences.GetProgramVariable("_seedCrop5");
-					if (_seedCrop5 > 0)
-					{
-						_SceneReferences.SetProgramVariable("_seedCrop5", _seedCrop5 - 1);
-						StartGrowing();
-					}
-					if (_seedCrop5 <= 0)
-					{
-						_popupOutOfSeeds.SetActive(true);
-					}
-					_sfxSource.PlayOneShot(_sfxClipPlanted);
-					break;
-
-			}
-		}*/
+		
 		StartGrowing();
 		_sfxSource.PlayOneShot(_sfxClipPlanted);
-		/*if (_useSeeds == false)
-		{
-			
-		}
-		*/
 	}
 	private void StartGrowing()
 	{
 
 		_meshPlanted.SetActive(true);
 		_meshHarvested.SetActive(false);
-		_popupOutOfSeeds.SetActive(false);
 
 		_popupNeedsWater.SetActive(false);
 		_meshWaterTrigger.SetActive(false);
@@ -533,102 +424,17 @@ public class PlantGrowing : UdonSharpBehaviour
 				float _upgradeMod = _upgradeLevelResetTime * _modifierResetTime;
 
 				_ResetTime = _ResetTime - _upgradeMod;
-				_txtResetTime.text = _ResetTime.ToString();
+				_displayResetTime.text = _ResetTime.ToString();
 				UpgradeFX();
 
 			}
 		}
 	}
 
-	public string _debugText;
 	public void Start()
 	{
-		//_playerAPI = Networking.LocalPlayer;
 		_ResetTime += _cropID;
-		GenerateKeys();
-
-		//PersistData_Load();
-		//GenerateCropMesh();
-
 	}
 
-	/*public void GenerateCropMesh()
-	{
-		var tmp = (Mesh[])_SceneReferences.GetProgramVariable("_cropMeshes");
-		int l = tmp.Length;
-		Mesh[] meshes = new Mesh[l];
-		meshes = (Mesh[])_SceneReferences.GetProgramVariable("_cropMeshes");
-		//_cropMesh = meshes[_cropID];
-		//_cropMeshFilter.mesh = _cropMesh;
-
-		foreach (ParticleSystem p in _particlesCrop)
-		{
-			//p.GetComponent<ParticleSystemRenderer>().mesh = _cropMesh;
-		}
-		
-	}*/
-
-	public void GenerateKeys()
-	{
-		_keyCurrentCropAmount = GenerateCropData("_currentCrop", _cropID);
-		_keyUpgradeLevelResetTime = GenerateCropData("_upgradeLevelResetTime", _cropID);
-		_keyUpgradeLevelYield = GenerateCropData("_upgradeLevelYield", _cropID);
-	}
-
-	public void PersistData_Save()
-	{
-		if (_playerAPI.isLocal)
-		{
-
-			int _currentCrop = (int)_SceneReferences.GetProgramVariable(_keyCurrentCropAmount);
-
-			PlayerData.SetInt(_keyCurrentCropAmount, _currentCrop);
-			PlayerData.SetInt(_keyUpgradeLevelResetTime, _upgradeLevelResetTime);
-			PlayerData.SetInt(_keyUpgradeLevelYield, _upgradeLevelYield);
-			
-		}
-	}
-
-	public void PersistData_Load()
-	{
-		if (_playerAPI.isLocal)
-		{
-
-			var currentCrop = PlayerData.GetInt(Networking.LocalPlayer, _keyCurrentCropAmount);
-			int _currentCrop = currentCrop;
-			_SceneReferences.SetProgramVariable(_keyCurrentCropAmount, _currentCrop);
-			_txtResetTime.text = _ResetTime.ToString();
-
-			var _bufferUpgradeLevelResetTime = PlayerData.GetInt(Networking.LocalPlayer, _keyUpgradeLevelResetTime);
-			if ( _bufferUpgradeLevelResetTime > 0 )
-			{
-				_upgradeLevelResetTime = _bufferUpgradeLevelResetTime;
-
-				/*float _upgradeMod = _upgradeLevelResetTime * _modifierResetTime;
-				float resettime = _ResetTime + _cropID;
-
-				_ResetTime = resettime - _upgradeMod;*/
-			}
-
-			
-
-			var _bufferUpgradeLevelYield = PlayerData.GetInt(Networking.LocalPlayer, _keyUpgradeLevelYield);
-			if (_bufferUpgradeLevelYield > 0 )
-			{
-				_upgradeLevelYield = _bufferUpgradeLevelYield;
-				/*_Yield = _upgradeLevelYield;*/
-			} //var public skibdi meow = new meowmeow[];
-		}
-	}
-
-	public override void OnPlayerDataUpdated(VRCPlayerApi player, PlayerData.Info[] infos)
-	{
-		/*if (player.isLocal)
-		{
-			PersistData_Load();
-
-			_playerAPI = player;
-		} */
-	}
 }
 
