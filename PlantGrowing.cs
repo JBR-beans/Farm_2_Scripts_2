@@ -22,10 +22,11 @@ public class PlantGrowing : UdonSharpBehaviour
 
 	[Header("Visuals")]
 	public MeshFilter _cropMeshFilter;
-	public ParticleSystem _ps1;
-	public ParticleSystem _ps2;
+	public ParticleSystem _particlesMeshFX;
+	public ParticleSystem _particlesCollectable;
 	public ParticleSystem _particlesDirt;
 	public ParticleSystem _particleWater;
+	public ParticleSystem _particlesSmallExplosion;
 	public GameObject _meshHarvested;
 	public GameObject _meshPlanted;
 	public GameObject _meshWaterTrigger;
@@ -246,69 +247,6 @@ public class PlantGrowing : UdonSharpBehaviour
 
 	}
 
-	/*public void HarvestCropType()
-	{
-
-		
-
-		//int _CropsPlanted = (int)_SceneReferences.GetProgramVariable("_CropsPlanted");
-
-		//string _totalCropType = GenerateCropData("_totalCrop", _cropID);
-		//string _currentCropType = GenerateCropData("_currentCrop", _cropID); // _currentCrop1
-		//string _valueCrop = GenerateCropData("_valueCrop", _cropID);
-
-		//int _totalCrop = (int)_SceneReferences.GetProgramVariable(_totalCropType);
-
-		
-		if (_isAutoBotActive == false)
-		{
-			
-			int _currentCrop = (int)_SceneReferences.GetProgramVariable(_currentCropType);
-
-			_SceneReferences.SetProgramVariable(_currentCropType, _currentCrop + _Yield);
-		}
-		
-		if (_isAutoBotActive == true)
-		{
-			int moneyearned = _Yield * (int)_SceneReferences.GetProgramVariable(_valueCrop);
-			int money = (int)_SceneReferences.GetProgramVariable("_currentMoney");
-			money += moneyearned;
-			_SceneReferences.SetProgramVariable("_currentMoney", money);
-			//UdonBehaviour _persistence = (UdonBehaviour)_SceneReferences.GetProgramVariable("_persistence");
-			//_persistence.SendCustomEvent("PersistData_Save");
-		}
-		
-		//_SceneReferences.SetProgramVariable(_totalCropType, _totalCrop + _Yield);
-	}*/
-
-
-	 // COLLECTCROP() MOVED TO ITS OWN SCRIPT
-
-	/*public void CollectCrop()
-	{
-		//var c = _particlesCrop[1].collision;
-		//c.enabled = false;
-		//int _CropsPlanted = (int)_SceneReferences.GetProgramVariable("_CropsPlanted");
-
-		//string _totalCropType = GenerateCropData("_totalCrop", _cropID);
-		string _currentCropType = GenerateCropData("_currentCrop", _cropID); // _currentCrop1
-		//string _valueCrop = GenerateCropData("_valueCrop", _cropID);
-
-		//int _totalCrop = (int)_SceneReferences.GetProgramVariable(_totalCropType);
-
-
-		int _currentCrop = (int)_SceneReferences.GetProgramVariable(_currentCropType);
-
-		_SceneReferences.SetProgramVariable(_currentCropType, _currentCrop + 1);
-		if (_debugView1.text.Length > 200)
-		{
-			_debugView1.text = "";
-		}
-		_debugView1.text += '\n' + "Item Collected" + _cropTag;
-		_sfxSource.PlayOneShot(_sfxClipCollect);
-		//c.enabled = true;
-	}*/
-
 	public void HarvestAutobot()
 	{
 		_sfxSource.PlayOneShot(_sfxClipHarvest);
@@ -327,30 +265,19 @@ public class PlantGrowing : UdonSharpBehaviour
 	{
 		_sfxSource.PlayOneShot(_sfxClipHarvest);
 
-		var emission = _ps1.emission;
+		var emission1 = _particlesMeshFX.emission;
 
-		if (_Yield < _maxLevelYield)
+		if (_Yield <= _maxLevelYield)
 		{
-			emission.SetBursts(
+			emission1.SetBursts(
 		new ParticleSystem.Burst[]
 		{
 				new ParticleSystem.Burst(0.0f, (Single)_Yield)
 		});
 		}
 
-
-		if (_Yield >= _maxLevelYield)
-		{
-			Single s = _maxLevelYield;
-			emission.SetBursts(
-		new ParticleSystem.Burst[]
-		{
-				new ParticleSystem.Burst(0.0f, s)
-		});
-		}
-
-
-		_ps1.Play();
+		_particlesSmallExplosion.Play();
+		_particlesMeshFX.Play();
 
 	}
 	public void HarvestPlant()

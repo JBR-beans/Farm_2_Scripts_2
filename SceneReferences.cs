@@ -389,8 +389,8 @@ public class SceneReferences : UdonSharpBehaviour
 		for (int i = 0; i < _crops.Length; i++)
 		{
 			MeshFilter mf = (MeshFilter)_crops[i].GetProgramVariable("_cropMeshFilter");
-			ParticleSystem ps1 = (ParticleSystem)_crops[i].GetProgramVariable("_ps1");
-			ParticleSystem ps2 = (ParticleSystem)_crops[i].GetProgramVariable("_ps2");
+			ParticleSystem ps1 = (ParticleSystem)_crops[i].GetProgramVariable("_particlesMeshFX");
+			ParticleSystem ps2 = (ParticleSystem)_crops[i].GetProgramVariable("_particlesCollectable");
 
 			ps1.GetComponent<ParticleSystemRenderer>().mesh = _cropMeshes[i];
 			ps2.GetComponent<ParticleSystemRenderer>().mesh = _cropMeshes[i];
