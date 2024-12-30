@@ -6,7 +6,7 @@ using VRC.Udon;
 
 public class PlayerTracker : UdonSharpBehaviour
 {
-    public void PostLateUpdate()
+    public void Update()
     {
         this.transform.SetPositionAndRotation(Networking.LocalPlayer.GetPosition(), Networking.LocalPlayer.GetRotation());
     }

@@ -29,7 +29,8 @@ public class SceneReferences : UdonSharpBehaviour
 	public int _moneyBonus;
 	public int _questsCompleted;*/
 
-
+	public GameObject _collider1;
+	public GameObject _collider2;
 	[Header("NEEDS REFACTOR")]
 
 	public UdonBehaviour[] _crops;
