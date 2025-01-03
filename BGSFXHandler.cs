@@ -9,22 +9,28 @@ public class BGSFXHandler : UdonSharpBehaviour
 	public UdonBehaviour _SceneReferences;
     public AudioSource _BGSFX;
     public AudioClip[] _bgmClips;
-	private AudioClip _currentClip;
-	private bool _changeClip = false;
+	private int _index = 0;
+
+	public void Start()
+	{
+		_bgmClips = (AudioClip[])_SceneReferences.GetProgramVariable("_bgmClipLibrary");
+	}
+
 	public void Update()
 	{
 		if (_BGSFX.isPlaying == false)
 		{
-			_changeClip = true;
 
-			if (_changeClip == true)
+			_index++;
+			if (_index > _bgmClips.Length)
 			{
-
-				RandomClip();
-
-				_BGSFX.Play();
-
+				_index = 0;
 			}
+
+			_BGSFX.clip = _bgmClips[_index];
+
+
+			_BGSFX.Play();
 		}
 	}
 
@@ -32,12 +38,7 @@ public class BGSFXHandler : UdonSharpBehaviour
 	{
 		// prevent previously played clip from being selected more than once after randomizing
 
-		_currentClip = _bgmClips[Random.Range(0, _bgmClips.Length)];
+		
 
-		if (_BGSFX.clip != _currentClip)
-		{
-			_BGSFX.clip = _currentClip;
-			_changeClip = false;
-		}
 	}
 }

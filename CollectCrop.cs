@@ -3,11 +3,13 @@ using UdonSharp;
 using UnityEngine;
 using VRC.SDKBase;
 using VRC.Udon;
+using VRC.Udon.Wrapper.Modules;
 
 public class CollectCrop : UdonSharpBehaviour
 {
 	public UdonBehaviour _SceneReferences;
 	public UdonBehaviour _LocalReferences;
+	public UdonBehaviour _QuestsHandler;
 	public GameObject _collider1;
 	public GameObject _collider2;
 	public int _cropID;
@@ -30,8 +32,10 @@ public class CollectCrop : UdonSharpBehaviour
 	public void LinkReferences()
 	{
 		_SceneReferences = (UdonBehaviour)_LocalReferences.GetProgramVariable("_SceneReferences");
+		_QuestsHandler = (UdonBehaviour)_SceneReferences.GetProgramVariable("_QuestsHandler");
 		_collider1 = (GameObject)_SceneReferences.GetProgramVariable("_collider1");
 		_collider2 = (GameObject)_SceneReferences.GetProgramVariable("_collider2");
+		
 		//_cropID = (int)_LocalReferences.GetProgramVariable("_cropID");
 	}
 
@@ -44,6 +48,10 @@ public class CollectCrop : UdonSharpBehaviour
 		current++;
 		_currentCrops[_cropID] = current;
 		_SceneReferences.SetProgramVariable("_currentCrops", _currentCrops);
+		if ((bool)_LocalReferences.GetProgramVariable("_isQuest") == true)
+		{
+			_QuestsHandler.SetProgramVariable("_currentQuestItemCount", (int)_QuestsHandler.GetProgramVariable("_currentQuestItemCount") + 1);
+		}
 
 		/*for (int i = 0; i < _currentCrops.Length; i++)
 		{

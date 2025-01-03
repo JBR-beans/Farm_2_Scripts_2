@@ -10,6 +10,9 @@ using VRC.Udon;
 
 public class PlantGrowing : UdonSharpBehaviour
 {
+	// put star on top
+	public bool _isQuest;
+
 	[Header("Crop Data")]
 	public UdonSharpBehaviour _SceneReferences;
 	public GameObject _CropRoot;
@@ -35,6 +38,7 @@ public class PlantGrowing : UdonSharpBehaviour
 	public Image _imgResetingVisual;
 	public GameObject _popupNeedsWater;
 	public GameObject _popupReadyToHarvest;
+	public GameObject _isQuestIndicator;
 
 	[Header("Audio")]
 	public AudioSource _sfxSource;
@@ -90,7 +94,7 @@ public class PlantGrowing : UdonSharpBehaviour
 	}
 	public void FixedUpdate()
 	{
-
+		_isQuestIndicator.SetActive(_isQuest);
 		// set _currentgrowtime to 0.0f to temporarily halt growth phases
 		if (_currentgrowtime < _maxGrowTime && _currentgrowtime >= 0.1f)
 		{

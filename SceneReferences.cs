@@ -13,6 +13,7 @@ public class SceneReferences : UdonSharpBehaviour
 	// fields with "total" count lifetime, for example as achievement or to unlock things
 	// duplicate crop to make more different plants
 	public UdonBehaviour _SelfReference;
+	public UdonBehaviour _QuestsHandler;
 	/*[Header("Quests")]
 	public bool _isQuesting;
 	public GameObject _questSupplyDrop;
@@ -31,7 +32,6 @@ public class SceneReferences : UdonSharpBehaviour
 
 	public GameObject _collider1;
 	public GameObject _collider2;
-	[Header("NEEDS REFACTOR")]
 
 	public UdonBehaviour[] _crops;
 	public string[] _nameCrops;
@@ -45,7 +45,8 @@ public class SceneReferences : UdonSharpBehaviour
 	public int[] _costCrops;
 	public bool[] _boughtCrops;
 	public GameObject[] _cropRoots;
-
+	public int _currentCandy;
+	public AudioClip[] _bgmClipLibrary;
 
 
 	//hud
@@ -56,6 +57,7 @@ public class SceneReferences : UdonSharpBehaviour
 	public TextMeshProUGUI[] _displayCropValues;
 	public TextMeshProUGUI[] _displayCropLevelYields;
 	public TextMeshProUGUI[] _displayCropLevelResetTimes;
+	public TextMeshProUGUI _displayCurrentCandy;
 
 	//public Button _buttonToggleEditMode;
 	public Image _imageToggleEditMode;
@@ -456,6 +458,8 @@ public class SceneReferences : UdonSharpBehaviour
 	}
 	public void Update_Displays()
 	{
+		_displayCurrentCandy.text = _currentCandy.ToString();
+
 		_displayAutoBots.text = "AutoBots in use: " + _totalAutoBot.ToString() + "/" + _maxAutoBot.ToString();
 		for (int i = 0; i < _crops.Length; i++)
 		{
@@ -475,6 +479,7 @@ public class SceneReferences : UdonSharpBehaviour
 
 		}
 	}
+
 
 	/*//public Mesh[] _cropMeshes;
 	[Header("crop1")]

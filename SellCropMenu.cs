@@ -366,7 +366,7 @@ public class SellCropMenu : UdonSharpBehaviour
 
 	public void SellAll()
 	{
-
+		UdonBehaviour[] _crops = (UdonBehaviour[])_SceneReferences.GetProgramVariable("_crops");
 		int money = (int)_SceneReferences.GetProgramVariable("_currentMoney");
 		int[] current = (int[])_SceneReferences.GetProgramVariable("_currentCrops");
 		int[] value = (int[])_SceneReferences.GetProgramVariable("_valueCrops");
@@ -374,20 +374,25 @@ public class SellCropMenu : UdonSharpBehaviour
 
 		for (int i = 0; i < current.Length; i++)
 		{
-			calculated[i] = current[i] * value[i];
-		}
+			// check if the crop at that index position is the current quest target
+			// if it is, then skip calculating it and dont remove the current crops
 
-		foreach (int i in calculated)
-		{
-			total += i;
+			if ((bool)_crops[i].GetProgramVariable("_isQuest") == false)
+			{
+				calculated[i] = current[i] * value[i];
+				current[i] = 0;
+			}
+			else
+			{
+				calculated[i] = 0;
+			}
+
+			total += calculated[i];
+
 		}
 
 		_SceneReferences.SetProgramVariable("_currentMoney", money + total);
 
-		for(int i = 0; i < current.Length; i++)
-		{
-			current[i] = 0;
-		}
 		SellFX();
 
 		_SceneReferences.SetProgramVariable("_currentCrops", current);
